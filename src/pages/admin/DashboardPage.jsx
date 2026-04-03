@@ -55,6 +55,7 @@ import {
 import { deleteReviewAdminApi, getAllReviewsAdminApi } from '../../services/reviews.api';
 import { logoutApi } from '../../services/auth.api';
 import { getRoleName, useAuthStore } from '../../store/authStore';
+import DataStatePanel from '../../components/common/DataStatePanel';
 
 const navItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
@@ -149,8 +150,10 @@ export default function DashboardPage() {
   const payments = paymentsQuery.data?.data || [];
   const roles = rolesQuery.data?.data || [];
   const users = usersQuery.data?.data || [];
-  const supportConversations = supportConversationsQuery.data?.data?.items || [];
-  const adminReviews = adminReviewsQuery.data?.data || [];
+  const supportConversationsResult = supportConversationsQuery.data;
+  const supportConversations = supportConversationsResult?.ok ? (supportConversationsResult?.data?.items || []) : [];
+  const adminReviewsResult = adminReviewsQuery.data;
+  const adminReviews = adminReviewsResult?.ok ? (adminReviewsResult?.data || []) : [];
   const adminName = user?.fullName || user?.username || 'Người dùng';
   const roleName = getRoleName(user);
   const isAdmin = ['ADMIN', 'MODERATOR'].includes(roleName);
@@ -162,6 +165,7 @@ export default function DashboardPage() {
     queryFn: () => getConversationMessagesApi(activeSupportConversationId, { page: 1, limit: 100 }),
     enabled: Boolean(activeSupportConversationId)
   });
+  const supportMessagesResult = supportMessagesQuery.data;
 
   function getOrderIdFromPayment(payment) {
     const rawOrder = payment?.order;
@@ -1101,7 +1105,7 @@ export default function DashboardPage() {
   }
 
   function renderSupportContent() {
-    const supportMessages = supportMessagesQuery.data?.data?.items || [];
+    const supportMessages = supportMessagesResult?.ok ? (supportMessagesResult?.data?.items || []) : [];
 
     return (
       <section className="stack-gap">
@@ -1126,8 +1130,25 @@ export default function DashboardPage() {
 
           <div className="admin-access-grid">
             <div className="orders-list">
-              {supportConversationsQuery.isLoading ? <p>Đang tải queue...</p> : null}
-              {!supportConversationsQuery.isLoading && supportConversations.length === 0 ? <p>Không có ticket phù hợp bộ lọc.</p> : null}
+              {supportConversationsQuery.isLoading ? (
+                <DataStatePanel type="loading" title="Đang tải queue" message="Hệ thống đang lấy danh sách ticket hỗ trợ." />
+              ) : null}
+              {!supportConversationsQuery.isLoading && supportConversationsResult && !supportConversationsResult.ok ? (
+                <DataStatePanel
+                  type="error"
+                  title="Không tải được queue hỗ trợ"
+                  message={supportConversationsResult.message}
+                  onRetry={() => supportConversationsQuery.refetch()}
+                />
+              ) : null}
+              {!supportConversationsQuery.isLoading && supportConversationsResult?.ok && supportConversations.length === 0 ? (
+                <DataStatePanel
+                  type="empty"
+                  title="Không có ticket phù hợp"
+                  message="Thử đổi bộ lọc trạng thái hoặc phạm vi assign để tìm ticket khác."
+                  onRetry={() => supportConversationsQuery.refetch()}
+                />
+              ) : null}
               {supportConversations.map((conversation) => {
                 const conversationId = conversation._id || conversation.id;
                 const isSelected = activeSupportConversationId === conversationId;
@@ -1172,6 +1193,25 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="support-message-list">
+                    {supportMessagesQuery.isLoading ? (
+                      <DataStatePanel type="loading" title="Đang tải tin nhắn" message="Lịch sử trao đổi đang được đồng bộ." />
+                    ) : null}
+                    {!supportMessagesQuery.isLoading && supportMessagesResult && !supportMessagesResult.ok ? (
+                      <DataStatePanel
+                        type="error"
+                        title="Không tải được tin nhắn"
+                        message={supportMessagesResult.message}
+                        onRetry={() => supportMessagesQuery.refetch()}
+                      />
+                    ) : null}
+                    {!supportMessagesQuery.isLoading && supportMessagesResult?.ok && supportMessages.length === 0 ? (
+                      <DataStatePanel
+                        type="empty"
+                        title="Chưa có tin nhắn"
+                        message="Hội thoại này chưa có nội dung trao đổi."
+                        onRetry={() => supportMessagesQuery.refetch()}
+                      />
+                    ) : null}
                     {supportMessages.map((message) => {
                       const messageId = message._id || message.id;
                       const isAdminSender = message.senderRole === 'admin';
@@ -1226,8 +1266,25 @@ export default function DashboardPage() {
           <span className="muted-text">Xem và xóa các review không phù hợp</span>
         </div>
 
-        {adminReviewsQuery.isLoading ? <p>Đang tải reviews...</p> : null}
-        {!adminReviewsQuery.isLoading && adminReviews.length === 0 ? <p>Chưa có review nào cần hiển thị.</p> : null}
+        {adminReviewsQuery.isLoading ? (
+          <DataStatePanel type="loading" title="Đang tải reviews" message="Danh sách review đang được cập nhật." />
+        ) : null}
+        {!adminReviewsQuery.isLoading && adminReviewsResult && !adminReviewsResult.ok ? (
+          <DataStatePanel
+            type="error"
+            title="Không tải được review"
+            message={adminReviewsResult.message}
+            onRetry={() => adminReviewsQuery.refetch()}
+          />
+        ) : null}
+        {!adminReviewsQuery.isLoading && adminReviewsResult?.ok && adminReviews.length === 0 ? (
+          <DataStatePanel
+            type="empty"
+            title="Chưa có review nào"
+            message="Hiện chưa có review cần moderation."
+            onRetry={() => adminReviewsQuery.refetch()}
+          />
+        ) : null}
 
         <div className="orders-list">
           {adminReviews.map((review) => {
