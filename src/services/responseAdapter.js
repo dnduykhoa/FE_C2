@@ -44,7 +44,11 @@ const errorCodeMessageMap = {
   DUPLICATE_ROLE_NAME: 'Tên role đã tồn tại.',
   ROLE_NOT_FOUND: 'Không tìm thấy role.',
   USER_NOT_FOUND: 'Không tìm thấy user.',
-  MISSING_ROLE_ID: 'Vui lòng chọn role để phân quyền.'
+  MISSING_ROLE_ID: 'Vui lòng chọn role để phân quyền.',
+  NOT_FOUND: 'Không tìm thấy dữ liệu.',
+  FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này.',
+  INVALID_STATE: 'Trạng thái hiện tại không cho phép thao tác.',
+  ASSIGN_CONFLICT: 'Ticket đã được admin khác nhận xử lý.'
 };
 
 export function normalizeError(error) {

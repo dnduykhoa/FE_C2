@@ -95,6 +95,7 @@ export default function MainLayout() {
                       <NavLink to="/user/orders" onClick={() => setIsProfileMenuOpen(false)}>Đơn hàng</NavLink>
                       <NavLink to="/user/payments" onClick={() => setIsProfileMenuOpen(false)}>Thanh toán</NavLink>
                       <NavLink to="/user/reservations" onClick={() => setIsProfileMenuOpen(false)}>Reservation</NavLink>
+                      <NavLink to="/user/support" onClick={() => setIsProfileMenuOpen(false)}>Hỗ trợ</NavLink>
                       <NavLink to="/user/reviews" onClick={() => setIsProfileMenuOpen(false)}>Review của tôi</NavLink>
                       <NavLink to="/user/profile" onClick={() => setIsProfileMenuOpen(false)}>Tài khoản</NavLink>
                       <button className="dropdown-logout" type="button" onClick={handleLogout}>Đăng xuất</button>

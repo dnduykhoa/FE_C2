@@ -6,12 +6,14 @@ import {
   Bell,
   LayoutDashboard,
   Menu,
+  MessageCircle,
   MoreVertical,
   Package,
   Search,
   Settings,
   ShoppingCart,
   ShieldCheck,
+  Star,
   TrendingUp,
   Users,
   Warehouse,
@@ -42,6 +44,15 @@ import { getAllPaymentsAdminApi, updatePaymentStatusApi } from '../../services/p
 import { updateOrderStatusApi } from '../../services/orders.api';
 import { createRoleApi, deleteRoleApi, getRolesApi, updateRoleApi } from '../../services/roles.api';
 import { getUsersApi, updateUserRoleApi } from '../../services/users.api';
+import {
+  assignConversationApi,
+  getAdminConversationsApi,
+  getConversationMessagesApi,
+  markConversationReadApi,
+  sendAdminMessageApi,
+  updateConversationStatusApi
+} from '../../services/messages.api';
+import { deleteReviewAdminApi, getAllReviewsAdminApi } from '../../services/reviews.api';
 import { logoutApi } from '../../services/auth.api';
 import { getRoleName, useAuthStore } from '../../store/authStore';
 
@@ -52,6 +63,8 @@ const navItems = [
   { id: 'inventories', icon: Warehouse, label: 'Tồn kho' },
   { id: 'orders', icon: ShoppingCart, label: 'Đơn hàng' },
   { id: 'payments', icon: Wallet, label: 'Thanh toán' },
+  { id: 'support', icon: MessageCircle, label: 'Hỗ trợ chat' },
+  { id: 'reviews', icon: Star, label: 'Review moderation' },
   { id: 'access', icon: ShieldCheck, label: 'Phân quyền' }
 ];
 
@@ -108,6 +121,10 @@ export default function DashboardPage() {
   const [showInventoryForm, setShowInventoryForm] = useState(false);
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [showRoleForm, setShowRoleForm] = useState(false);
+  const [supportFilter, setSupportFilter] = useState({ status: '', assigned: 'mine' });
+  const [selectedSupportConversationId, setSelectedSupportConversationId] = useState('');
+  const [supportReplyContent, setSupportReplyContent] = useState('');
+  const [supportStatus, setSupportStatus] = useState('pending');
   const [categoryForm, setCategoryForm] = useState(emptyCategoryForm());
   const [productForm, setProductForm] = useState(emptyProductForm());
   const [inventoryForm, setInventoryForm] = useState(emptyInventoryForm());
@@ -120,6 +137,11 @@ export default function DashboardPage() {
   const paymentsQuery = useQuery({ queryKey: ['payments', 'admin-all'], queryFn: () => getAllPaymentsAdminApi({ page: 1, limit: 50 }) });
   const rolesQuery = useQuery({ queryKey: ['roles'], queryFn: getRolesApi });
   const usersQuery = useQuery({ queryKey: ['users', 'admin-management'], queryFn: getUsersApi });
+  const supportConversationsQuery = useQuery({
+    queryKey: ['support', 'admin-conversations', supportFilter],
+    queryFn: () => getAdminConversationsApi({ page: 1, limit: 50, status: supportFilter.status || undefined, assigned: supportFilter.assigned || undefined })
+  });
+  const adminReviewsQuery = useQuery({ queryKey: ['reviews', 'admin-all'], queryFn: getAllReviewsAdminApi });
 
   const categories = categoriesQuery.data?.data || [];
   const products = productsQuery.data?.data || [];
@@ -127,10 +149,19 @@ export default function DashboardPage() {
   const payments = paymentsQuery.data?.data || [];
   const roles = rolesQuery.data?.data || [];
   const users = usersQuery.data?.data || [];
+  const supportConversations = supportConversationsQuery.data?.data?.items || [];
+  const adminReviews = adminReviewsQuery.data?.data || [];
   const adminName = user?.fullName || user?.username || 'Người dùng';
   const roleName = getRoleName(user);
   const isAdmin = ['ADMIN', 'MODERATOR'].includes(roleName);
   const adminDisplayName = user?.fullName || user?.username || 'Admin User';
+
+  const activeSupportConversationId = selectedSupportConversationId || supportConversations[0]?._id || supportConversations[0]?.id || '';
+  const supportMessagesQuery = useQuery({
+    queryKey: ['support', 'admin-messages', activeSupportConversationId],
+    queryFn: () => getConversationMessagesApi(activeSupportConversationId, { page: 1, limit: 100 }),
+    enabled: Boolean(activeSupportConversationId)
+  });
 
   function getOrderIdFromPayment(payment) {
     const rawOrder = payment?.order;
@@ -417,6 +448,70 @@ export default function DashboardPage() {
       }
       toast.success('Đã cập nhật role cho user');
       queryClient.invalidateQueries({ queryKey: ['users'] });
+    }
+  });
+
+  const assignSupportMutation = useMutation({
+    mutationFn: assignConversationApi,
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể nhận ticket');
+        return;
+      }
+      toast.success('Đã nhận ticket hỗ trợ');
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages'] });
+    }
+  });
+
+  const sendSupportReplyMutation = useMutation({
+    mutationFn: ({ id, payload }) => sendAdminMessageApi(id, payload),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể gửi phản hồi');
+        return;
+      }
+      toast.success('Đã gửi phản hồi');
+      setSupportReplyContent('');
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages', activeSupportConversationId] });
+    }
+  });
+
+  const updateSupportStatusMutation = useMutation({
+    mutationFn: ({ id, payload }) => updateConversationStatusApi(id, payload),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể cập nhật trạng thái ticket');
+        return;
+      }
+      toast.success('Đã cập nhật trạng thái ticket');
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages', activeSupportConversationId] });
+    }
+  });
+
+  const markSupportReadMutation = useMutation({
+    mutationFn: markConversationReadApi,
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể đánh dấu đã đọc');
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages', activeSupportConversationId] });
+    }
+  });
+
+  const deleteReviewModerationMutation = useMutation({
+    mutationFn: deleteReviewAdminApi,
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể xóa review');
+        return;
+      }
+      toast.success('Đã xóa review');
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'admin-all'] });
     }
   });
 
@@ -1005,6 +1100,158 @@ export default function DashboardPage() {
     );
   }
 
+  function renderSupportContent() {
+    const supportMessages = supportMessagesQuery.data?.data?.items || [];
+
+    return (
+      <section className="stack-gap">
+        <section className="paper-block stack-gap">
+          <div className="section-head-row">
+            <h2>Queue hỗ trợ khách hàng</h2>
+            <div className="hero-actions" style={{ marginTop: 0 }}>
+              <select value={supportFilter.assigned} onChange={(event) => setSupportFilter((prev) => ({ ...prev, assigned: event.target.value }))}>
+                <option value="mine">Ticket của tôi</option>
+                <option value="false">Chưa assign</option>
+                <option value="true">Đã assign</option>
+              </select>
+              <select value={supportFilter.status} onChange={(event) => setSupportFilter((prev) => ({ ...prev, status: event.target.value }))}>
+                <option value="">Tất cả trạng thái</option>
+                <option value="open">open</option>
+                <option value="pending">pending</option>
+                <option value="resolved">resolved</option>
+                <option value="closed">closed</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="admin-access-grid">
+            <div className="orders-list">
+              {supportConversationsQuery.isLoading ? <p>Đang tải queue...</p> : null}
+              {!supportConversationsQuery.isLoading && supportConversations.length === 0 ? <p>Không có ticket phù hợp bộ lọc.</p> : null}
+              {supportConversations.map((conversation) => {
+                const conversationId = conversation._id || conversation.id;
+                const isSelected = activeSupportConversationId === conversationId;
+                const customerName = conversation?.customerId?.fullName || conversation?.customerId?.username || 'Khách hàng';
+
+                return (
+                  <button
+                    key={conversationId}
+                    type="button"
+                    className={`support-conversation-btn ${isSelected ? 'active' : ''}`}
+                    onClick={() => setSelectedSupportConversationId(conversationId)}
+                  >
+                    <strong>{conversation.subject}</strong>
+                    <span>{customerName} · {conversation.status} · {conversation.priority}</span>
+                    <small>{conversation.lastMessageAt ? new Date(conversation.lastMessageAt).toLocaleString('vi-VN') : '-'}</small>
+                    {conversation.unreadCountForAdmin ? <em>{conversation.unreadCountForAdmin} tin chưa đọc</em> : null}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="paper-block stack-gap" style={{ marginBottom: 0 }}>
+              <h3>Xử lý hội thoại</h3>
+              {!activeSupportConversationId ? <p>Hãy chọn một hội thoại để xử lý.</p> : null}
+              {activeSupportConversationId ? (
+                <>
+                  <div className="hero-actions" style={{ marginTop: 0 }}>
+                    <button className="btn secondary" type="button" onClick={() => assignSupportMutation.mutate(activeSupportConversationId)}>Nhận ticket</button>
+                    <button className="btn secondary" type="button" onClick={() => markSupportReadMutation.mutate(activeSupportConversationId)}>Đánh dấu đã đọc</button>
+                    <select value={supportStatus} onChange={(event) => setSupportStatus(event.target.value)}>
+                      <option value="pending">pending</option>
+                      <option value="resolved">resolved</option>
+                      <option value="closed">closed</option>
+                    </select>
+                    <button
+                      className="btn secondary"
+                      type="button"
+                      onClick={() => updateSupportStatusMutation.mutate({ id: activeSupportConversationId, payload: { status: supportStatus } })}
+                    >
+                      Cập nhật trạng thái
+                    </button>
+                  </div>
+
+                  <div className="support-message-list">
+                    {supportMessages.map((message) => {
+                      const messageId = message._id || message.id;
+                      const isAdminSender = message.senderRole === 'admin';
+                      return (
+                        <article key={messageId} className={`support-message-item ${isAdminSender ? 'mine' : 'admin'}`}>
+                          <p>{message.content}</p>
+                          <small>{message.createdAt ? new Date(message.createdAt).toLocaleString('vi-VN') : '-'}</small>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  <form
+                    className="stack-gap"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (!supportReplyContent.trim()) {
+                        toast.error('Nội dung phản hồi không được bỏ trống');
+                        return;
+                      }
+
+                      sendSupportReplyMutation.mutate({
+                        id: activeSupportConversationId,
+                        payload: { content: supportReplyContent.trim() }
+                      });
+                    }}
+                  >
+                    <textarea
+                      rows={3}
+                      placeholder="Nhập phản hồi cho khách hàng"
+                      value={supportReplyContent}
+                      onChange={(event) => setSupportReplyContent(event.target.value)}
+                    />
+                    <div className="hero-actions" style={{ marginTop: 0 }}>
+                      <button className="btn primary" type="submit">Gửi phản hồi</button>
+                    </div>
+                  </form>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      </section>
+    );
+  }
+
+  function renderReviewsModerationContent() {
+    return (
+      <section className="paper-block stack-gap">
+        <div className="section-head-row">
+          <h2>Review moderation</h2>
+          <span className="muted-text">Xem và xóa các review không phù hợp</span>
+        </div>
+
+        {adminReviewsQuery.isLoading ? <p>Đang tải reviews...</p> : null}
+        {!adminReviewsQuery.isLoading && adminReviews.length === 0 ? <p>Chưa có review nào cần hiển thị.</p> : null}
+
+        <div className="orders-list">
+          {adminReviews.map((review) => {
+            const reviewId = review._id || review.id;
+            const productName = review?.product?.name || 'Sản phẩm';
+            const reviewer = review?.user?.username || review?.user?.email || 'Khách hàng';
+            return (
+              <article className="order-card" key={reviewId}>
+                <div>
+                  <h3>{productName}</h3>
+                  <p><strong>{reviewer}</strong> · {review.rating}/5</p>
+                  <p>{review.comment || 'Không có nội dung'}</p>
+                </div>
+                <div className="hero-actions">
+                  <button className="btn secondary" type="button" onClick={() => deleteReviewModerationMutation.mutate(reviewId)}>Xóa review</button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+
   function renderActiveContent() {
     if (activeTab === 'dashboard') return renderDashboardOverview();
     if (activeTab === 'categories') return renderCategoryContent();
@@ -1012,6 +1259,8 @@ export default function DashboardPage() {
     if (activeTab === 'inventories') return renderInventoryContent();
     if (activeTab === 'orders') return renderOrdersContent();
     if (activeTab === 'payments') return renderPaymentsContent();
+    if (activeTab === 'support') return renderSupportContent();
+    if (activeTab === 'reviews') return renderReviewsModerationContent();
     if (activeTab === 'access') return renderAccessContent();
     return null;
   }

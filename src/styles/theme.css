@@ -1056,6 +1056,60 @@ textarea:focus {
   margin-bottom: 4px;
 }
 
+.support-conversation-btn {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #F8F2E9;
+  color: var(--text-main);
+  padding: 12px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.support-conversation-btn span,
+.support-conversation-btn small,
+.support-conversation-btn em {
+  color: var(--text-sub);
+  font-style: normal;
+}
+
+.support-conversation-btn.active {
+  border-color: var(--brand-primary);
+  background: #F1E4D4;
+}
+
+.support-message-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.support-message-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #F8F2E9;
+  padding: 10px;
+}
+
+.support-message-item.mine {
+  background: #F1E4D4;
+  border-color: #DABFA3;
+}
+
+.support-message-item p {
+  margin: 0 0 4px;
+}
+
+.support-message-item small {
+  color: var(--text-sub);
+}
+
 .status-badge {
   padding: 4px 10px;
   border-radius: 999px;
