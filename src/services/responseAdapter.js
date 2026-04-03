@@ -20,13 +20,29 @@ export function normalizeSuccess(raw) {
   };
 }
 
+const errorCodeMessageMap = {
+  CART_EMPTY: 'Giỏ hàng đang trống, chưa thể tạo đơn hàng.',
+  PRODUCT_NOT_FOUND: 'Sản phẩm không còn tồn tại hoặc đã ngừng bán.',
+  INVENTORY_NOT_FOUND: 'Sản phẩm chưa có dữ liệu tồn kho, vui lòng liên hệ quản trị.',
+  INSUFFICIENT_STOCK: 'Số lượng tồn kho không đủ để tạo đơn.',
+  INSUFFICIENT_RESERVED_STOCK: 'Tồn kho giữ chỗ không đủ để xử lý đơn hàng.',
+  INVALID_PRODUCT_ID: 'Sản phẩm không hợp lệ.',
+  INVALID_QUANTITY: 'Số lượng sản phẩm không hợp lệ.',
+  ORDER_NOT_CANCELABLE: 'Đơn hàng này không thể hủy ở trạng thái hiện tại.',
+  ORDER_NOT_FOUND: 'Không tìm thấy đơn hàng.'
+};
+
 export function normalizeError(error) {
   const payload = error?.response?.data || {};
+  const errorCode = payload.errorCode || 'UNKNOWN_ERROR';
+  const fallbackByCode = errorCodeMessageMap[errorCode] || '';
+  const finalMessage = fallbackByCode || payload.message || error.message || 'Có lỗi xảy ra';
+
   return {
     ok: false,
     data: null,
-    message: payload.message || error.message || 'Co loi xay ra',
-    errorCode: payload.errorCode || 'UNKNOWN_ERROR',
+    message: finalMessage,
+    errorCode: errorCode,
     errors: payload.errors || []
   };
 }

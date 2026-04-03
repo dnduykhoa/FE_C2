@@ -1,6 +1,9 @@
 import dayjs from 'dayjs';
+import toast from 'react-hot-toast';
+import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
+import { addToCartApi } from '../../services/carts.api';
 import { getProductDetailApi } from '../../services/products.api';
 import { getReviewsByProductApi } from '../../services/reviews.api';
 
@@ -17,6 +20,17 @@ export default function ProductDetailPage() {
     queryKey: ['reviews', id],
     queryFn: () => getReviewsByProductApi(id),
     enabled: Boolean(id)
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: (payload) => addToCartApi(payload),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể thêm vào giỏ');
+        return;
+      }
+      toast.success('Đã thêm vào giỏ hàng');
+    }
   });
 
   const product = productQuery.data?.data;
@@ -44,7 +58,14 @@ export default function ProductDetailPage() {
         <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
         <p>{product.description || 'Sản phẩm gốm mang hơi hướng làng nghề truyền thống.'}</p>
         <div className="hero-actions">
-          <button className="btn primary" type="button">Thêm vào giỏ (sắp mở)</button>
+          <button
+            className="btn primary"
+            type="button"
+            onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
+            disabled={addToCartMutation.isPending}
+          >
+            Thêm vào giỏ
+          </button>
           <Link className="btn secondary" to="/products">Quay lại</Link>
         </div>
       </article>

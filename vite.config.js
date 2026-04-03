@@ -12,7 +12,14 @@ export default defineConfig({
       '/roles': 'http://localhost:3000',
       '/products': 'http://localhost:3000',
       '/categories': 'http://localhost:3000',
-      '/reviews': 'http://localhost:3000'
+      '/carts': 'http://localhost:3000',
+      '/orders': 'http://localhost:3000',
+      '/reservations': 'http://localhost:3000',
+      '/inventories': 'http://localhost:3000',
+      '/payments': 'http://localhost:3000',
+      '/reviews': 'http://localhost:3000',
+      '/messages': 'http://localhost:3000',
+      '/support-chat': 'http://localhost:3000'
     }
   }
 })

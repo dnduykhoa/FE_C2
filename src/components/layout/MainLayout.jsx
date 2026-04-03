@@ -22,9 +22,9 @@ export default function MainLayout() {
           <Link className="brand" to="/">Gốm Xưa.</Link>
           <nav className="main-nav">
             <NavLink to="/">Trang chủ</NavLink>
-            {/* <NavLink to="/products">Bộ sưu tập</NavLink> */}
             <NavLink to="/products">Sản phẩm</NavLink>
-            {/* <NavLink to="/products">Sản phẩm</NavLink> */}
+            <NavLink to="/user/cart">Giỏ hàng</NavLink>
+            <NavLink to="/user/orders">Đơn hàng</NavLink>
             <NavLink to="/auth/login">Đăng nhập</NavLink>
             <NavLink to="/auth/register">Đăng ký</NavLink>
             <NavLink to="/user/profile">Tài khoản</NavLink>

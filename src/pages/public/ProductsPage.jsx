@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { addToCartApi } from '../../services/carts.api';
 import { getCategoriesApi } from '../../services/categories.api';
 import { getProductsApi, searchProductsApi } from '../../services/products.api';
 
@@ -33,6 +36,18 @@ export default function ProductsPage() {
         minPrice: filters.minPrice || undefined,
         maxPrice: filters.maxPrice || undefined
       });
+    }
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: (payload) => addToCartApi(payload),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message || 'Không thể thêm vào giỏ');
+        return;
+      }
+
+      toast.success('Đã thêm vào giỏ hàng');
     }
   });
 
@@ -88,7 +103,17 @@ export default function ProductsPage() {
             <h3>{product.name}</h3>
             <p className="muted-text">{product.category?.name || 'Không rõ danh mục'}</p>
             <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
-            <Link className="btn secondary" to={`/products/${product.id}`}>Xem chi tiết</Link>
+            <div className="hero-actions">
+              <button
+                className="btn primary"
+                type="button"
+                onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
+                disabled={addToCartMutation.isPending}
+              >
+                Thêm vào giỏ
+              </button>
+              <Link className="btn secondary" to={`/products/${product.id}`}>Xem chi tiết</Link>
+            </div>
           </article>
         ))}
       </div>

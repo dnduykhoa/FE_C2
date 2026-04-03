@@ -453,7 +453,7 @@ Ngày cập nhật: 03/04/2026
 - [x] Giai đoạn 0 - Khởi tạo nền tảng
 - [x] Giai đoạn 1 - Auth + hồ sơ + quyền truy cập
 - [x] Giai đoạn 2 - Public catalog và product detail
-- [ ] Giai đoạn 3 - Cart + Checkout COD + Orders user
+- [x] Giai đoạn 3 - Cart + Checkout COD + Orders user
 - [ ] Giai đoạn 4 - Payments + Reservations + Reviews user
 - [ ] Giai đoạn 5 - Admin core
 - [ ] Giai đoạn 6 - Support chat + moderation
@@ -486,9 +486,32 @@ Ngày cập nhật: 03/04/2026
 - Hiển thị review theo sản phẩm.
 - Theme CSS bám đúng palette và nguyên tắc trong `Layout.md`.
 
+### Đã hoàn thành trong giai đoạn 3
+- Tạo service gọi API giỏ hàng (`/carts`): lấy giỏ, thêm sản phẩm, cập nhật số lượng, xóa item, clear giỏ.
+- Tạo service gọi API đơn hàng (`/orders`): tạo đơn COD, lấy danh sách đơn, lấy chi tiết đơn, hủy đơn.
+- Hoàn thiện trang `Giỏ hàng`:
+  - tăng/giảm số lượng
+  - xóa từng sản phẩm
+  - xóa toàn bộ giỏ
+  - tính tổng tạm tính
+- Hoàn thiện trang `Checkout COD`:
+  - nhập địa chỉ giao hàng
+  - nhập ghi chú
+  - tạo đơn hàng theo flow backend (ưu tiên lấy item từ cart)
+- Hoàn thiện trang `Đơn hàng của tôi` và `Chi tiết đơn`:
+  - hiển thị trạng thái order/payment
+  - hiển thị item và tổng tiền
+  - hủy đơn khi trạng thái còn `PENDING`
+- Nối route private cho user:
+  - `/user/cart`
+  - `/user/checkout`
+  - `/user/orders`
+  - `/user/orders/:id`
+- Nối nút thêm vào giỏ từ trang danh sách sản phẩm và chi tiết sản phẩm.
+
 ### Kiểm tra build
 - `npm install`: thành công.
 - `npm run build`: thành công.
 
 ### Bước tiếp theo
-- Triển khai giai đoạn 3 theo kế hoạch: Cart + Checkout COD + Orders user.
+- Triển khai giai đoạn 4 theo kế hoạch: Payments + Reservations + Reviews user.
