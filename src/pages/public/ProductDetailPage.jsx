@@ -23,14 +23,14 @@ export default function ProductDetailPage() {
   const reviews = reviewQuery.data?.data || [];
 
   if (productQuery.isLoading) {
-    return <p>Dang tai chi tiet san pham...</p>;
+    return <p>Đang tải chi tiết sản phẩm...</p>;
   }
 
   if (!product) {
     return (
       <section className="paper-block">
-        <h1>Khong tim thay san pham</h1>
-        <Link className="btn secondary" to="/products">Quay lai danh sach</Link>
+        <h1>Không tìm thấy sản phẩm</h1>
+        <Link className="btn secondary" to="/products">Quay lại danh sách</Link>
       </section>
     );
   }
@@ -40,26 +40,26 @@ export default function ProductDetailPage() {
       <article className="paper-block">
         <div className="detail-thumb" />
         <h1>{product.name}</h1>
-        <p className="muted-text">{product.category?.name || 'Khong ro danh muc'}</p>
+        <p className="muted-text">{product.category?.name || 'Không rõ danh mục'}</p>
         <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
-        <p>{product.description || 'San pham gom mang hoi huong lang nghe truyen thong.'}</p>
+        <p>{product.description || 'Sản phẩm gốm mang hơi hướng làng nghề truyền thống.'}</p>
         <div className="hero-actions">
-          <button className="btn primary" type="button">Them vao gio (sap mo)</button>
-          <Link className="btn secondary" to="/products">Quay lai</Link>
+          <button className="btn primary" type="button">Thêm vào giỏ (sắp mở)</button>
+          <Link className="btn secondary" to="/products">Quay lại</Link>
         </div>
       </article>
 
       <article className="paper-block">
-        <h2>Danh gia san pham</h2>
-        {reviewQuery.isLoading ? <p>Dang tai danh gia...</p> : null}
-        {!reviewQuery.isLoading && reviews.length === 0 ? <p>Chua co danh gia nao.</p> : null}
+        <h2>Đánh giá sản phẩm</h2>
+        {reviewQuery.isLoading ? <p>Đang tải đánh giá...</p> : null}
+        {!reviewQuery.isLoading && reviews.length === 0 ? <p>Chưa có đánh giá nào.</p> : null}
         <div className="review-list">
           {reviews.map((review) => (
             <div key={review._id} className="review-item">
               <p className="muted-text">
-                {review.user?.fullName || review.user?.username || 'Khach hang'} - {dayjs(review.createdAt).format('DD/MM/YYYY')}
+                {review.user?.fullName || review.user?.username || 'Khách hàng'} - {dayjs(review.createdAt).format('DD/MM/YYYY')}
               </p>
-              <p>Diem: {review.rating}/5</p>
+              <p>Điểm: {review.rating}/5</p>
               <p>{review.comment}</p>
             </div>
           ))}

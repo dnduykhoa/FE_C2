@@ -5,10 +5,10 @@ export default function ProfilePage() {
 
   return (
     <section className="paper-block">
-      <h1>Ho so tai khoan</h1>
+      <h1>Hồ sơ tài khoản</h1>
       <div className="profile-grid">
         <div>
-          <label>Ten dang nhap</label>
+          <label>Tên đăng nhập</label>
           <p>{user?.username || '-'}</p>
         </div>
         <div>
@@ -16,7 +16,7 @@ export default function ProfilePage() {
           <p>{user?.email || '-'}</p>
         </div>
         <div>
-          <label>Ho ten</label>
+          <label>Họ tên</label>
           <p>{user?.fullName || '-'}</p>
         </div>
       </div>

@@ -6,15 +6,15 @@ import { z } from 'zod';
 import { registerApi } from '../../services/auth.api';
 
 const schema = z.object({
-  username: z.string().min(3, 'Ten dang nhap toi thieu 3 ky tu'),
-  email: z.string().email('Email khong hop le'),
+  username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự'),
+  email: z.string().email('Email không hợp lệ'),
   password: z
     .string()
-    .min(8, 'Mat khau toi thieu 8 ky tu')
-    .regex(/[A-Z]/, 'Can it nhat 1 chu in hoa')
-    .regex(/[a-z]/, 'Can it nhat 1 chu thuong')
-    .regex(/[0-9]/, 'Can it nhat 1 so')
-    .regex(/[^A-Za-z0-9]/, 'Can it nhat 1 ky tu dac biet'),
+    .min(8, 'Mật khẩu tối thiểu 8 ký tự')
+    .regex(/[A-Z]/, 'Cần ít nhất 1 chữ in hoa')
+    .regex(/[a-z]/, 'Cần ít nhất 1 chữ thường')
+    .regex(/[0-9]/, 'Cần ít nhất 1 số')
+    .regex(/[^A-Za-z0-9]/, 'Cần ít nhất 1 ký tự đặc biệt'),
   fullName: z.string().optional(),
   birthday: z.string().optional()
 });
@@ -33,19 +33,19 @@ export default function RegisterPage() {
   async function onSubmit(values) {
     const result = await registerApi(values);
     if (!result.ok) {
-      toast.error(result.message || 'Dang ky that bai');
+      toast.error(result.message || 'Đăng ký thất bại');
       return;
     }
 
-    toast.success('Dang ky thanh cong, vui long dang nhap');
+    toast.success('Đăng ký thành công, vui lòng đăng nhập');
     navigate('/auth/login');
   }
 
   return (
     <section className="paper-block auth-block">
-      <h1>Dang ky tai khoan</h1>
+      <h1>Đăng ký tài khoản</h1>
       <form className="form-grid" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="username">Ten dang nhap</label>
+        <label htmlFor="username">Tên đăng nhập</label>
         <input id="username" type="text" {...register('username')} />
         {errors.username ? <small className="error-text">{errors.username.message}</small> : null}
 
@@ -53,18 +53,18 @@ export default function RegisterPage() {
         <input id="email" type="email" {...register('email')} />
         {errors.email ? <small className="error-text">{errors.email.message}</small> : null}
 
-        <label htmlFor="password">Mat khau</label>
+        <label htmlFor="password">Mật khẩu</label>
         <input id="password" type="password" {...register('password')} />
         {errors.password ? <small className="error-text">{errors.password.message}</small> : null}
 
-        <label htmlFor="fullName">Ho ten</label>
+        <label htmlFor="fullName">Họ tên</label>
         <input id="fullName" type="text" {...register('fullName')} />
 
-        <label htmlFor="birthday">Ngay sinh</label>
+        <label htmlFor="birthday">Ngày sinh</label>
         <input id="birthday" type="date" {...register('birthday')} />
 
         <button className="btn primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Dang xu ly...' : 'Tao tai khoan'}
+          {isSubmitting ? 'Đang xử lý...' : 'Tạo tài khoản'}
         </button>
       </form>
     </section>

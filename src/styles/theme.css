@@ -49,6 +49,12 @@ h4 {
   margin: 0 auto;
 }
 
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -94,6 +100,7 @@ h4 {
 
 .page-content {
   padding: 28px 0 48px;
+  flex: 1;
 }
 
 .site-footer {
@@ -143,6 +150,204 @@ h4 {
 .hero-art {
   display: flex;
   justify-content: center;
+}
+
+.home-page {
+  display: grid;
+  gap: 22px;
+}
+
+.home-hero {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  overflow: hidden;
+}
+
+.home-hero-copy h1 {
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.08;
+  margin-bottom: 18px;
+}
+
+.hero-lead {
+  color: var(--text-sub);
+  font-size: 1.02rem;
+  line-height: 1.8;
+  max-width: 58ch;
+}
+
+.home-hero-visual {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image-frame {
+  width: min(100%, 460px);
+  aspect-ratio: 4 / 5;
+  padding: 14px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.hero-ornament {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  left: 8%;
+  bottom: 10%;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg-muted);
+  z-index: 0;
+}
+
+.home-section {
+  display: grid;
+  gap: 18px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+}
+
+.section-heading h2 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  margin-bottom: 8px;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--text-sub);
+}
+
+.section-link {
+  color: var(--brand-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.section-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.home-product-grid {
+  gap: 14px;
+}
+
+.home-product-card {
+  padding: 12px;
+}
+
+.product-image-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #E6D7C5;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 12px;
+}
+
+.product-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-card-body {
+  display: grid;
+  gap: 14px;
+}
+
+.product-card-body h3 {
+  font-size: 1.3rem;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.product-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.product-action {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 12px;
+  color: var(--text-sub);
+  font-weight: 600;
+  transition: all 0.2s ease-out;
+}
+
+.product-action:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: #F7EFE4;
+}
+
+.home-story {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 30px 24px;
+}
+
+.story-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--brand-secondary);
+  background: var(--bg-main);
+}
+
+.home-story h2 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  margin-bottom: 0;
+}
+
+.home-story p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--text-sub);
+  line-height: 1.8;
 }
 
 .pot-shape {
@@ -316,6 +521,19 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .home-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero-visual {
+    min-height: 360px;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
   .detail-grid {
     grid-template-columns: 1fr;
   }
@@ -332,5 +550,19 @@ textarea:focus {
 
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-hero,
+  .home-story {
+    padding: 20px;
+  }
+
+  .home-hero-copy h1 {
+    font-size: 2.4rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

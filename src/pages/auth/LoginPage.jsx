@@ -7,8 +7,8 @@ import { loginApi } from '../../services/auth.api';
 import { useAuthStore } from '../../store/authStore';
 
 const schema = z.object({
-  username: z.string().min(1, 'Vui long nhap ten dang nhap'),
-  password: z.string().min(1, 'Vui long nhap mat khau')
+  username: z.string().min(1, 'Vui lòng nhập tên đăng nhập'),
+  password: z.string().min(1, 'Vui lòng nhập mật khẩu')
 });
 
 export default function LoginPage() {
@@ -27,35 +27,35 @@ export default function LoginPage() {
   async function onSubmit(values) {
     const result = await loginApi(values);
     if (!result.ok) {
-      toast.error(result.message || 'Dang nhap that bai');
+      toast.error(result.message || 'Đăng nhập thất bại');
       return;
     }
 
     const data = result.data || {};
     setAuth({ token: data.token, user: data.user });
-    toast.success('Dang nhap thanh cong');
+    toast.success('Đăng nhập thành công');
     navigate(location.state?.from || '/');
   }
 
   return (
     <section className="paper-block auth-block">
-      <h1>Dang nhap</h1>
+      <h1>Đăng nhập</h1>
       <form className="form-grid" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="username">Ten dang nhap</label>
+        <label htmlFor="username">Tên đăng nhập</label>
         <input id="username" type="text" {...register('username')} />
         {errors.username ? <small className="error-text">{errors.username.message}</small> : null}
 
-        <label htmlFor="password">Mat khau</label>
+        <label htmlFor="password">Mật khẩu</label>
         <input id="password" type="password" {...register('password')} />
         {errors.password ? <small className="error-text">{errors.password.message}</small> : null}
 
         <button className="btn primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Dang xu ly...' : 'Dang nhap'}
+          {isSubmitting ? 'Đang xử lý...' : 'Đăng nhập'}
         </button>
       </form>
       <div className="auth-links">
-        <Link to="/auth/forgot-password">Quen mat khau?</Link>
-        <Link to="/auth/register">Chua co tai khoan?</Link>
+        <Link to="/auth/forgot-password">Quên mật khẩu?</Link>
+        <Link to="/auth/register">Chưa có tài khoản?</Link>
       </div>
     </section>
   );

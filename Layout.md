@@ -1,73 +1,73 @@
-# Layout Design - Website Ban Gom Co
+# Layout Design - Website Bán Gốm Cổ
 
-## 1) Dinh huong thiet ke tong the
+## 1) Định hướng thiết kế tổng thể
 
-Muc tieu giao dien:
-- Co khong khi xua cu, lang que, truyen thong Viet.
-- Toi gian, de nhin, de dung, khong loe loet.
-- Cam giac "chat lieu": dat nung, giay do, go cu, vai moc.
+Mục tiêu giao diện:
+- Có không khí xưa cũ, làng quê, truyền thống Việt.
+- Tối giản, dễ nhìn, dễ dùng, không lòe loẹt.
+- Cảm giác "chất liệu": đất nung, giấy dó, gỗ cũ, vải mộc.
 
-Tu khoa thi giac:
-- Co dien, moc mac, am, tram, mut.
-- It mau nhan, uu tien mau dat va trung tinh nong.
-- Bo cuc thoang, nhieu khoang trang, typography de doc.
+Từ khóa thị giác:
+- Cổ điển, mộc mạc, ấm, trầm, mịn.
+- Ít màu nhấn, ưu tiên màu đất và trung tính nóng.
+- Bố cục thoáng, nhiều khoảng trắng, typography dễ đọc.
 
 ---
 
-## 2) Bang mau chu dao (palette chinh)
+## 2) Bảng màu chủ đạo (palette chính)
 
-## 2.1 Palette A - Gom Dat Nung (de xuat dung chinh)
-- Nen chinh: #F4EFE6 (giay cu)
-- Nen phu: #E9DFCF (vai moc)
-- Mau chu chinh: #2F241D (nau dam)
-- Mau chu phu: #5C4A3F (nau trung)
-- Mau nhan thuong hieu: #9E5B3A (dat nung)
-- Mau nhan phu: #7A8B63 (reu kho)
+## 2.1 Palette A - Gốm Đất Nung (đề xuất dùng chính)
+- Nền chính: #F4EFE6 (giấy cũ)
+- Nền phụ: #E9DFCF (vải mộc)
+- Màu chữ chính: #2F241D (nâu đậm)
+- Màu chữ phụ: #5C4A3F (nâu trung)
+- Màu nhấn thương hiệu: #9E5B3A (đất nung)
+- Màu nhấn phụ: #7A8B63 (rêu khô)
 - Mau vien/line: #CDBFAA
-- Mau hover nhe: #E2D5C3
-- Mau card background: #FBF8F3
+- Màu hover nhẹ: #E2D5C3
+- Màu card background: #FBF8F3
 
-Y nghia:
-- Day la to hop an toan, co net xua, rat hop gom co va do thu cong.
+Ý nghĩa:
+- Đây là tổ hợp an toàn, có nét xưa, rất hợp gốm cổ và đồ thủ công.
 
-## 2.2 Palette B - Chieu Que Co (phuong an thay the)
-- Nen chinh: #F7F1E7
-- Nen phu: #EDE2D0
-- Mau chu chinh: #2D2A26
-- Mau chu phu: #665A4D
-- Mau nhan: #A06A4B
-- Mau nhan lanh nhe: #6D7B75
-- Mau line: #D3C6B3
+## 2.2 Palette B - Chiều Quê Cổ (phương án thay thế)
+- Nền chính: #F7F1E7
+- Nền phụ: #EDE2D0
+- Màu chữ chính: #2D2A26
+- Màu chữ phụ: #665A4D
+- Màu nhấn: #A06A4B
+- Màu nhấn lạnh nhẹ: #6D7B75
+- Màu line: #D3C6B3
 
-## 2.3 Mau trang thai
+## 2.3 Màu trạng thái
 - Success: #5E7D4B
 - Warning: #B9863B
 - Error: #A1463A
 - Info: #5B6F83
 
-Luu y:
-- Mau trang thai phai mut, khong dung xanh do tuoi gac.
+Lưu ý:
+- Màu trạng thái phải mụt, không dùng xanh đỏ tươi gắt.
 
 ---
 
-## 3) Ty le mau de phoi (rat quan trong)
+## 3) Tỷ lệ màu để phối (rất quan trọng)
 
-Ap dung quy tac 70 - 20 - 10:
+Áp dụng quy tắc 70 - 20 - 10:
 - 70%: nen trung tinh nong (F4EFE6, FBF8F3)
 - 20%: nau text/line (2F241D, CDBFAA)
 - 10%: mau nhan dat nung (9E5B3A) hoac reu kho (7A8B63)
 
-Khong dung qua 2 mau nhan trong 1 man hinh.
+Không dùng quá 2 màu nhấn trong 1 màn hình.
 
 ---
 
-## 4) Typography (phong vi co dien nhung van de doc)
+## 4) Typography (phong vị cổ điển nhưng vẫn dễ đọc)
 
-## 4.1 Font de xuat
-- Heading (co hon): "Cormorant Garamond", "Playfair Display", serif
-- Body (de doc): "Be Vietnam Pro", "Noto Sans", sans-serif
+## 4.1 Font đề xuất
+- Heading (cổ hơn): "Cormorant Garamond", "Playfair Display", serif
+- Body (dễ đọc): "Be Vietnam Pro", "Noto Sans", sans-serif
 
-## 4.2 He thong chu
+## 4.2 Hệ thống chữ
 - H1: 44-52, weight 600, line-height 1.15
 - H2: 32-40, weight 600
 - H3: 24-28, weight 600
@@ -76,14 +76,14 @@ Khong dung qua 2 mau nhan trong 1 man hinh.
 - Body S: 14
 - Caption: 12
 
-## 4.3 Nguyen tac
-- Heading dung serif de tao chat "co".
-- Noi dung dai dung sans de de doc.
-- Khong dung qua 2 font family.
+## 4.3 Nguyên tắc
+- Heading dùng serif để tạo chất "cổ".
+- Nội dung dài dùng sans để dễ đọc.
+- Không dùng quá 2 font family.
 
 ---
 
-## 5) Bo cuc (layout structure)
+## 5) Bố cục (layout structure)
 
 ## 5.1 Khung trang
 - Max width content: 1200px
@@ -93,56 +93,56 @@ Khong dung qua 2 mau nhan trong 1 man hinh.
 
 ## 5.2 Header
 - Cao 72-80px
-- Nen sang, vien duoi 1px mau #CDBFAA
-- Logo ben trai, menu giua, icon tai khoan/gio hang ben phai
-- Sticky nhe khi cuon
+- Nền sáng, viền dưới 1px màu #CDBFAA
+- Logo bên trái, menu giữa, icon tài khoản/giỏ hàng bên phải
+- Sticky nhẹ khi cuộn
 
 ## 5.3 Hero section
-- Nen co texture rat nhe (giay/vai), khong dung gradient loe
-- 1 heading lon + 1 subtitle ngan + 1 CTA chinh
-- Anh gom lon ben canh, bo goc nhe 12-16
+- Nền có texture rất nhẹ (giấy/vải), không dùng gradient lòe
+- 1 heading lớn + 1 subtitle ngắn + 1 CTA chính
+- Ảnh gốm lớn bên cạnh, bo góc nhẹ 12-16
 
 ## 5.4 Product listing
 - Grid:
   - Desktop: 4 cot
   - Tablet: 3 cot
   - Mobile: 2 cot
-- Khoang cach card: 20-24
-- Filter panel don gian, nen dat o tren hoac cot trai desktop
+- Khoảng cách card: 20-24
+- Filter panel đơn giản, nên đặt ở trên hoặc cột trái desktop
 
 ## 5.5 Footer
-- Nen dam hon nen trang mot cap (E9DFCF)
-- Chia 3-4 cot: gioi thieu, lien he, chinh sach, social
-- Typography nho gon, khong qua dam
+- Nền đậm hơn nền trắng một cấp (E9DFCF)
+- Chia 3-4 cột: giới thiệu, liên hệ, chính sách, social
+- Typography nhỏ gọn, không quá đậm
 
 ---
 
-## 6) Nguyen tac component
+## 6) Nguyên tắc component
 
 ## 6.1 Button
 - Primary:
-  - Nen: #9E5B3A
-  - Chu: #FDF9F2
+  - Nền: #9E5B3A
+  - Chữ: #FDF9F2
   - Hover: #8B4F32
 - Secondary:
-  - Nen: transparent
-  - Vien: 1px #9E5B3A
-  - Chu: #9E5B3A
+  - Nền: transparent
+  - Viền: 1px #9E5B3A
+  - Chữ: #9E5B3A
   - Hover: #F0E5D7
 - Border radius: 10-12
-- Chieu cao: 42-46
+- Chiều cao: 42-46
 
-## 6.2 Card san pham
-- Nen: #FBF8F3
-- Vien: 1px #E2D5C3
+-## 6.2 Card sản phẩm
+- Nền: #FBF8F3
+- Viền: 1px #E2D5C3
 - Radius: 14
-- Shadow rat nhe: 0 6px 18px rgba(47, 36, 29, 0.08)
-- Hover: dich len 2px + shadow tang rat nhe
+- Shadow rất nhẹ: 0 6px 18px rgba(47, 36, 29, 0.08)
+- Hover: dịch lên 2px + shadow tăng rất nhẹ
 
 ## 6.3 Input/Form
-- Nen input: #FDF9F2
-- Vien: 1px #CDBFAA
-- Focus: vien #9E5B3A + bong mo 0 0 0 3px rgba(158, 91, 58, 0.15)
+- Nền input: #FDF9F2
+- Viền: 1px #CDBFAA
+- Focus: viền #9E5B3A + bóng mờ 0 0 0 3px rgba(158, 91, 58, 0.15)
 - Placeholder: #9C8E81
 
 ## 6.4 Badge status
@@ -152,30 +152,30 @@ Khong dung qua 2 mau nhan trong 1 man hinh.
 
 ---
 
-## 7) Phong cach hinh anh va icon
+## 7) Phong cách hình ảnh và icon
 
-## 7.1 Hinh anh
-- Uu tien anh co tong mau am, nhiet do mau hoi vang.
-- Tranh saturation cao.
-- Co the phu lop texture rat nhe (2-4% opacity).
+## 7.1 Hình ảnh
+- Ưu tiên ảnh có tông màu ấm, nhiệt độ màu hơi vàng.
+- Tránh saturation cao.
+- Có thể phủ lớp texture rất nhẹ (2-4% opacity).
 
 ## 7.2 Icon
-- Dung icon net gon, stroke vua phai.
-- Mau icon: #5C4A3F, hover #9E5B3A.
+- Dùng icon nét gọn, stroke vừa phải.
+- Màu icon: #5C4A3F, hover #9E5B3A.
 
 ---
 
-## 8) Motion va hieu ung
+## 8) Motion và hiệu ứng
 
-Chi dung chuyen dong nhe, cham:
-- Transition co ban: 180ms - 240ms, ease-out
+Chỉ dùng chuyển động nhẹ, chậm:
+- Transition cơ bản: 180ms - 240ms, ease-out
 - Card hover: translateY(-2px)
-- Button hover: doi nen nhe + shadow min
-- Khong dung animation quay, nhay, neon
+- Button hover: đổi nền nhẹ + shadow mịn
+- Không dùng animation quay, nhảy, neon
 
 ---
 
-## 9) Theme token de dua vao CSS
+## 9) Theme token để đưa vào CSS
 
 ```css
 :root {
@@ -207,65 +207,65 @@ Chi dung chuyen dong nhe, cham:
 
 ---
 
-## 10) Huong dan phoi cho tung trang
+## 10) Hướng dẫn phối cho từng trang
 
-## 10.1 Trang chu
-- Nen tong: --bg-main
+## 10.1 Trang chủ
+- Nền tổng: --bg-main
 - Hero card: --bg-soft
-- CTA chinh: --brand-primary
+- CTA chính: --brand-primary
 - Section divider: line mỏng --line
 
-## 10.2 Trang danh sach san pham
-- Nen tong sang, de card noi bat
-- Filter bar dung --bg-muted
-- Gia sale co the nhan bang --brand-primary, gia goc --text-sub
+## 10.2 Trang danh sách sản phẩm
+- Nền tổng sáng, để card nổi bật
+- Filter bar dùng --bg-muted
+- Giá sale có thể nhấn bằng --brand-primary, giá gốc --text-sub
 
-## 10.3 Trang chi tiet san pham
-- Khu anh: nen trung tinh
-- Nut mua ngay: primary
-- Nut them gio: secondary
-- Block review: nen --bg-soft, vien --line
+## 10.3 Trang chi tiết sản phẩm
+- Khu ảnh: nền trung tính
+- Nút mua ngay: primary
+- Nút thêm giỏ: secondary
+- Block review: nền --bg-soft, viền --line
 
 ## 10.4 Cart/Checkout
-- Layout 2 cot desktop:
-  - Trai: danh sach item
-  - Phai: tong ket don + CTA
-- O tong ket don dung nen --bg-soft va vien --line
+- Layout 2 cột desktop:
+  - Trái: danh sách item
+  - Phải: tổng kết đơn + CTA
+- Ô tổng kết đơn dùng nền --bg-soft và viền --line
 
-## 10.5 Admin dashboard
-- Van giu tone co dien nhung gon hon user page
+-## 10.5 Admin dashboard
+- Vẫn giữ tone cổ điển nhưng gọn hơn user page
 - Table:
-  - header nen --bg-muted
+  - header nền --bg-muted
   - row hover --hover-soft
-- Status badge dung bo mau trang thai o muc 2.3
+- Status badge dùng bộ màu trạng thái ở mục 2.3
 
 ---
 
-## 11) Nhung dieu nen tranh
+## 11) Những điều nên tránh
 
-- Khong dung mau tim/neon.
-- Khong dung gradient qua manh.
-- Khong dung qua nhieu box-shadow dam.
-- Khong de 1 man hinh qua 3 cap font-size chinh.
-- Khong tron qua nhieu mau nhan (se mat chat toi gian).
+- Không dùng màu tím/neon.
+- Không dùng gradient quá mạnh.
+- Không dùng quá nhiều box-shadow đậm.
+- Không để 1 màn hình quá 3 cấp font-size chính.
+- Không trộn quá nhiều màu nhấn (sẽ mất chất tối giản).
 
 ---
 
-## 12) 3 phuong an phoi nhanh de chon
+## 12) 3 phương án phối nhanh để chọn
 
-## Option 1 - Truyen thong an toan (de xuat)
-- Dung Palette A 100%.
-- Header sang, footer muted.
-- Nhieu vien line mỏng.
+## Option 1 - Truyền thống an toàn (đề xuất)
+- Dùng Palette A 100%.
+- Header sáng, footer muted.
+- Nhiều viền line mỏng.
 
-## Option 2 - Tram am hon
-- Nen chinh #EFE7DB
-- Text chinh #2B211B
+## Option 2 - Trầm ấm hơn
+- Nền chính #EFE7DB
+- Text chính #2B211B
 - Brand #8D4F33
-- Hop cho concept "gom co cao cap".
+- Hợp cho concept "gốm cổ cao cấp".
 
-## Option 3 - Lang que moc mac
-- Them mau reu (#7A8B63) cho badge va chip filter.
-- Background texture vai rat nhe o hero va footer.
+## Option 3 - Làng quê mộc mạc
+- Thêm màu rêu (#7A8B63) cho badge và chip filter.
+- Background texture vải rất nhẹ ở hero và footer.
 
-Khuyen nghi chot Option 1 de de trien khai, de mo rong, it rui ro lech tone.
+Khuyến nghị chốt Option 1 để dễ triển khai, dễ mở rộng, ít rủi ro lệch tone.
