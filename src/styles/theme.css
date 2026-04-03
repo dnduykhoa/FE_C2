@@ -664,6 +664,24 @@ textarea:focus {
   gap: 12px;
 }
 
+.data-state-panel {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  background: #F8F2E9;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.data-state-panel h3 {
+  margin: 0;
+}
+
+.data-state-panel p {
+  margin: 0;
+  color: var(--text-sub);
+}
+
 .cart-list,
 .orders-list,
 .order-item-list {

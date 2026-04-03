@@ -9,6 +9,7 @@ import {
   markConversationReadApi,
   sendCustomerMessageApi
 } from '../../services/messages.api';
+import DataStatePanel from '../../components/common/DataStatePanel';
 
 const defaultTicketForm = {
   subject: '',
@@ -27,7 +28,8 @@ export default function SupportChatPage() {
     queryFn: () => getMyConversationsApi({ page: 1, limit: 30 })
   });
 
-  const conversations = conversationsQuery.data?.data?.items || [];
+  const conversationsResult = conversationsQuery.data;
+  const conversations = conversationsResult?.ok ? (conversationsResult?.data?.items || []) : [];
 
   const activeConversationId = useMemo(() => {
     if (selectedConversationId) {
@@ -112,7 +114,8 @@ export default function SupportChatPage() {
     });
   }
 
-  const messages = messagesQuery.data?.data?.items || [];
+  const messagesResult = messagesQuery.data;
+  const messages = messagesResult?.ok ? (messagesResult?.data?.items || []) : [];
 
   return (
     <section className="stack-gap">
@@ -149,8 +152,25 @@ export default function SupportChatPage() {
         <h2>Hội thoại hỗ trợ của tôi</h2>
         <div className="admin-access-grid">
           <div className="orders-list">
-            {conversationsQuery.isLoading ? <p>Đang tải hội thoại...</p> : null}
-            {!conversationsQuery.isLoading && conversations.length === 0 ? <p>Bạn chưa có hội thoại hỗ trợ nào.</p> : null}
+            {conversationsQuery.isLoading ? (
+              <DataStatePanel type="loading" title="Đang tải hội thoại" message="Hệ thống đang lấy danh sách ticket của bạn." />
+            ) : null}
+            {!conversationsQuery.isLoading && conversationsResult && !conversationsResult.ok ? (
+              <DataStatePanel
+                type="error"
+                title="Không tải được hội thoại"
+                message={conversationsResult.message}
+                onRetry={() => conversationsQuery.refetch()}
+              />
+            ) : null}
+            {!conversationsQuery.isLoading && conversationsResult?.ok && conversations.length === 0 ? (
+              <DataStatePanel
+                type="empty"
+                title="Chưa có ticket hỗ trợ"
+                message="Bạn có thể tạo ticket mới ở biểu mẫu phía trên."
+                onRetry={() => conversationsQuery.refetch()}
+              />
+            ) : null}
             {conversations.map((conversation) => {
               const conversationId = conversation._id || conversation.id;
               const isActive = conversationId === activeConversationId;
@@ -179,6 +199,25 @@ export default function SupportChatPage() {
             {activeConversationId ? (
               <>
                 <div className="support-message-list">
+                  {messagesQuery.isLoading ? (
+                    <DataStatePanel type="loading" title="Đang tải tin nhắn" message="Tin nhắn của hội thoại đang được đồng bộ." />
+                  ) : null}
+                  {!messagesQuery.isLoading && messagesResult && !messagesResult.ok ? (
+                    <DataStatePanel
+                      type="error"
+                      title="Không tải được tin nhắn"
+                      message={messagesResult.message}
+                      onRetry={() => messagesQuery.refetch()}
+                    />
+                  ) : null}
+                  {!messagesQuery.isLoading && messagesResult?.ok && messages.length === 0 ? (
+                    <DataStatePanel
+                      type="empty"
+                      title="Chưa có tin nhắn"
+                      message="Hãy gửi tin nhắn đầu tiên để bắt đầu trao đổi với bộ phận hỗ trợ."
+                      onRetry={() => messagesQuery.refetch()}
+                    />
+                  ) : null}
                   {messages.map((message) => {
                     const messageId = message._id || message.id;
                     const isMine = message.senderRole === 'customer';

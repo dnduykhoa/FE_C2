@@ -457,7 +457,7 @@ Ngày cập nhật: 03/04/2026
 - [x] Giai đoạn 4 - Payments + Reservations + Reviews user
 - [x] Giai đoạn 5 - Admin core
 - [x] Giai đoạn 6 - Support chat + moderation
-- [ ] Giai đoạn 7 - Hoàn thiện chất lượng
+- [x] Giai đoạn 7 - Hoàn thiện chất lượng
 
 ### Đã hoàn thành trong giai đoạn 0
 - Router đa layout và route guard (`RequireAuth`, `RequireRole`).
@@ -579,9 +579,24 @@ Ghi chú theo BE thực tế:
   - `DELETE /reviews/admin/:id`
 - Bổ sung map lỗi support chat vào `responseAdapter` để thông báo tiếng Việt rõ ràng.
 
+  ### Đã hoàn thành trong giai đoạn 7
+  - Tạo component trạng thái dùng chung `DataStatePanel` cho loading/empty/error + nút retry.
+  - Áp dụng trạng thái chất lượng vào màn user hỗ trợ:
+    - danh sách hội thoại
+    - lịch sử tin nhắn
+    - retry khi lỗi API
+  - Áp dụng trạng thái chất lượng vào dashboard admin:
+    - queue hỗ trợ
+    - lịch sử tin nhắn hỗ trợ
+    - review moderation list
+  - Tối ưu cấu hình retry của React Query:
+    - không retry với lỗi 4xx phổ biến (400/401/403/404/422)
+    - exponential backoff cho lỗi tạm thời
+  - Hoàn thiện UX fallback để tránh màn trống khi API lỗi hoặc chưa có dữ liệu.
+
 ### Kiểm tra build
 - `npm install`: thành công.
 - `npm run build`: thành công.
 
 ### Bước tiếp theo
-- Triển khai giai đoạn 7 theo kế hoạch: hoàn thiện chất lượng (loading/empty state, tối ưu UX, rà soát lỗi và test checklist).
+- Bắt đầu giai đoạn tối ưu nâng cao (analytics, hiệu năng và test tự động) nếu cần mở rộng sau demo.
