@@ -18,3 +18,21 @@ export async function getPaymentDetailApi(id) {
     return normalizeError(error);
   }
 }
+
+export async function getAllPaymentsAdminApi(params = {}) {
+  try {
+    const response = await httpClient.get('/payments', { params });
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
+
+export async function updatePaymentStatusApi(id, payload) {
+  try {
+    const response = await httpClient.patch(`/payments/${id}/status`, payload);
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}

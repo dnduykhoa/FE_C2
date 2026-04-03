@@ -35,7 +35,16 @@ const errorCodeMessageMap = {
   MISSING_PRODUCT_ID: 'Thiếu sản phẩm cho thao tác này.',
   INVALID_RESERVED_UNTIL: 'Thời gian giữ chỗ không hợp lệ.',
   RESERVATION_NOT_FOUND: 'Không tìm thấy reservation.',
-  RESERVATION_NOT_EDITABLE: 'Reservation này không thể chỉnh sửa.'
+  RESERVATION_NOT_EDITABLE: 'Reservation này không thể chỉnh sửa.',
+  DUPLICATE_CATEGORY_NAME: 'Tên danh mục đã tồn tại.',
+  DUPLICATE_PRODUCT_NAME_OR_SKU: 'Tên sản phẩm hoặc SKU đã tồn tại.',
+  CATEGORY_NOT_FOUND: 'Không tìm thấy danh mục.',
+  DUPLICATE_INVENTORY: 'Sản phẩm đã có bản ghi tồn kho.',
+  INVALID_STOCK_VALUE: 'Giá trị tồn kho không hợp lệ.',
+  DUPLICATE_ROLE_NAME: 'Tên role đã tồn tại.',
+  ROLE_NOT_FOUND: 'Không tìm thấy role.',
+  USER_NOT_FOUND: 'Không tìm thấy user.',
+  MISSING_ROLE_ID: 'Vui lòng chọn role để phân quyền.'
 };
 
 export function normalizeError(error) {

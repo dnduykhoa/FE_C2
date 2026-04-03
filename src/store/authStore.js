@@ -16,5 +16,18 @@ export const useAuthStore = create(
 );
 
 export function getRoleName(user) {
-  return String(user?.role?.name || '').toUpperCase();
+  const rawRole = user?.role;
+
+  if (!rawRole) {
+    return '';
+  }
+
+  if (typeof rawRole === 'string') {
+    if (/^[a-fA-F0-9]{24}$/.test(rawRole)) {
+      return '';
+    }
+    return rawRole.toUpperCase();
+  }
+
+  return String(rawRole.name || rawRole.roleName || '').toUpperCase();
 }

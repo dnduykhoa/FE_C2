@@ -455,7 +455,7 @@ Ngày cập nhật: 03/04/2026
 - [x] Giai đoạn 2 - Public catalog và product detail
 - [x] Giai đoạn 3 - Cart + Checkout COD + Orders user
 - [x] Giai đoạn 4 - Payments + Reservations + Reviews user
-- [ ] Giai đoạn 5 - Admin core
+- [x] Giai đoạn 5 - Admin core
 - [ ] Giai đoạn 6 - Support chat + moderation
 - [ ] Giai đoạn 7 - Hoàn thiện chất lượng
 
@@ -535,9 +535,32 @@ Ngày cập nhật: 03/04/2026
 - Cập nhật menu điều hướng cho các khu vực stage 4.
 - Bổ sung map lỗi backend sang thông báo tiếng Việt cho các mã lỗi stage 4.
 
+### Đã hoàn thành trong giai đoạn 5
+- Mở rộng service admin:
+  - Category: create/update/delete.
+  - Product: create/update/delete.
+  - Inventory: list/create/increase/decrease/adjust/delete.
+  - Order: update status theo order id.
+  - Payment: list all + update payment status.
+- Hoàn thiện `Dashboard` admin theo module:
+  - Quản lý danh mục (CRUD).
+  - Quản lý sản phẩm (CRUD).
+  - Quản lý tồn kho (tạo bản ghi, tăng/giảm/adjust, xóa).
+  - Quản lý đơn hàng (cập nhật trạng thái theo id).
+  - Quản lý thanh toán (list + cập nhật status).
+- Bổ sung map lỗi backend sang thông báo tiếng Việt cho mã lỗi admin core.
+- Cập nhật header chung FE theo yêu cầu:
+  - Chỉ giữ tab `Trang chủ` và `Sản phẩm`.
+  - Giỏ hàng chuyển thành icon.
+- Bổ sung style cho tab admin và header rút gọn.
+
+Ghi chú theo BE thực tế:
+- Backend hiện chưa có endpoint `GET /orders` dạng list-all cho admin; route hiện tại vẫn trả đơn theo `req.userId`.
+- Dashboard admin xử lý phần cập nhật đơn hàng theo `orderId` (chọn từ payment hoặc nhập trực tiếp) để bám đúng API hiện có.
+
 ### Kiểm tra build
 - `npm install`: thành công.
 - `npm run build`: thành công.
 
 ### Bước tiếp theo
-- Triển khai giai đoạn 5 theo kế hoạch: Admin core (category/product/inventory/order/payment).
+- Triển khai giai đoạn 6 theo kế hoạch: Support chat + moderation.

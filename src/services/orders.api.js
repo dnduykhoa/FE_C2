@@ -36,3 +36,12 @@ export async function cancelOrderApi(id) {
     return normalizeError(error);
   }
 }
+
+export async function updateOrderStatusApi(id, payload) {
+  try {
+    const response = await httpClient.put(`/orders/${id}/status`, payload);
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
