@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { z } from 'zod';
+import { Eye, EyeOff, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
 import { resetPasswordApi } from '../../services/auth.api';
+import '../../styles/AuthPage.css';
 
 const schema = z.object({
   token: z.string().min(1, 'Token không được để trống'),
@@ -19,6 +22,7 @@ const schema = z.object({
 export default function ResetPasswordPage() {
   const [params] = useSearchParams();
   const tokenFromQuery = params.get('token') || '';
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -39,21 +43,82 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <section className="paper-block auth-block">
-      <h1>Đặt lại mật khẩu</h1>
-      <form className="form-grid" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="token">Token</label>
-        <input id="token" type="text" {...register('token')} />
-        {errors.token ? <small className="error-text">{errors.token.message}</small> : null}
+    <div className="login-page-wrapper">
+      <div className="login-container">
+        <div className="login-card">
+          {/* Header */}
+          <div className="login-header">
+            <div className="login-header-icon" style={{background: 'linear-gradient(135deg, var(--success) 0%, #7a9d5d 100%)'}}>
+              <CheckCircle2 size={32} />
+            </div>
+            <h1>Đặt Lại Mật Khẩu</h1>
+            <p className="login-subtitle">Nhập mật khẩu mới của bạn</p>
+          </div>
 
-        <label htmlFor="newPassword">Mật khẩu mới</label>
-        <input id="newPassword" type="password" {...register('newPassword')} />
-        {errors.newPassword ? <small className="error-text">{errors.newPassword.message}</small> : null}
+          {/* Form */}
+          <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+            {/* Token Field - Hidden */}
+            <input
+              id="token"
+              type="hidden"
+              {...register('token')}
+            />
 
-        <button className="btn primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Đang xử lý...' : 'Cập nhật mật khẩu'}
-        </button>
-      </form>
-    </section>
+            {/* Password Field */}
+            <div className="login-form-group">
+              <label htmlFor="newPassword" className="login-label required">Mật khẩu mới</label>
+              <div className="login-input-wrapper">
+                <Lock size={18} className="login-input-icon" />
+                <input
+                  id="newPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Nhập mật khẩu mới"
+                  className={`login-input ${errors.newPassword ? 'login-input-error' : ''}`}
+                  {...register('newPassword')}
+                />
+                <button
+                  type="button"
+                  className="login-password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.newPassword && (
+                <div className="login-error">
+                  <AlertCircle size={14} />
+                  <span>{errors.newPassword.message}</span>
+                </div>
+              )}
+              <p className="auth-hint">Mật khẩu phải chứa: chữ hoa, chữ thường, số, ký tự đặc biệt.</p>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              className="btn primary login-submit-btn"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="login-loader" />
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                'Cập Nhật Mật Khẩu'
+              )}
+            </button>
+          </form>
+
+          {/* Links */}
+          <div className="auth-bottom-links">
+            <Link to="/auth/login" className="login-link">
+              ← Quay lại Đăng Nhập
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
