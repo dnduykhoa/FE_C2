@@ -45,3 +45,21 @@ export async function deleteReviewApi(id) {
     return normalizeError(error);
   }
 }
+
+export async function getAllReviewsAdminApi() {
+  try {
+    const response = await httpClient.get('/reviews/admin/all');
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
+
+export async function deleteReviewAdminApi(id) {
+  try {
+    const response = await httpClient.delete(`/reviews/admin/${id}`);
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}

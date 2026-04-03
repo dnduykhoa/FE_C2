@@ -20,6 +20,7 @@ import PaymentDetailPage from '../pages/user/PaymentDetailPage';
 import PaymentsPage from '../pages/user/PaymentsPage';
 import ProfilePage from '../pages/user/ProfilePage';
 import ReservationsPage from '../pages/user/ReservationsPage';
+import SupportChatPage from '../pages/user/SupportChatPage';
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
           { path: 'user/payments/:id', element: <PaymentDetailPage /> },
           { path: 'user/reservations', element: <ReservationsPage /> },
           { path: 'user/reviews', element: <MyReviewsPage /> },
+          { path: 'user/support', element: <SupportChatPage /> },
           {
             element: <RequireRole roles={['ADMIN', 'MODERATOR']} />,
             children: [{ path: 'admin', element: <DashboardPage /> }]

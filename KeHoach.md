@@ -456,7 +456,7 @@ Ngày cập nhật: 03/04/2026
 - [x] Giai đoạn 3 - Cart + Checkout COD + Orders user
 - [x] Giai đoạn 4 - Payments + Reservations + Reviews user
 - [x] Giai đoạn 5 - Admin core
-- [ ] Giai đoạn 6 - Support chat + moderation
+- [x] Giai đoạn 6 - Support chat + moderation
 - [ ] Giai đoạn 7 - Hoàn thiện chất lượng
 
 ### Đã hoàn thành trong giai đoạn 0
@@ -558,9 +558,30 @@ Ghi chú theo BE thực tế:
 - Backend hiện chưa có endpoint `GET /orders` dạng list-all cho admin; route hiện tại vẫn trả đơn theo `req.userId`.
 - Dashboard admin xử lý phần cập nhật đơn hàng theo `orderId` (chọn từ payment hoặc nhập trực tiếp) để bám đúng API hiện có.
 
+### Đã hoàn thành trong giai đoạn 6
+- Đọc và bám đúng flow BE support chat trong `routes/messages.js` + `controllers/messages.js`.
+- Tạo service API `messages` cho FE:
+  - user: tạo conversation, lấy danh sách conversation của tôi, lấy messages, gửi tin nhắn, mark read.
+  - admin/moderator: lấy queue conversation, assign, reply, cập nhật status.
+- Hoàn thiện trang user `Hỗ trợ`:
+  - tạo ticket mới (subject/priority/content)
+  - xem danh sách hội thoại của tôi
+  - xem lịch sử tin nhắn
+  - gửi tin nhắn và mark read
+- Nối route private user cho hỗ trợ:
+  - `/user/support`
+- Cập nhật menu tài khoản để truy cập nhanh màn hình hỗ trợ.
+- Mở rộng dashboard admin:
+  - tab `Hỗ trợ chat`: queue + lọc trạng thái/assigned, chọn ticket, assign, reply, mark read, update status.
+  - tab `Review moderation`: xem toàn bộ review và xóa review không phù hợp (bám endpoint admin review của BE).
+- Mở rộng service reviews cho admin moderation:
+  - `GET /reviews/admin/all`
+  - `DELETE /reviews/admin/:id`
+- Bổ sung map lỗi support chat vào `responseAdapter` để thông báo tiếng Việt rõ ràng.
+
 ### Kiểm tra build
 - `npm install`: thành công.
 - `npm run build`: thành công.
 
 ### Bước tiếp theo
-- Triển khai giai đoạn 6 theo kế hoạch: Support chat + moderation.
+- Triển khai giai đoạn 7 theo kế hoạch: hoàn thiện chất lượng (loading/empty state, tối ưu UX, rà soát lỗi và test checklist).
