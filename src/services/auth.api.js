@@ -45,3 +45,12 @@ export async function logoutApi() {
     return normalizeError(error);
   }
 }
+
+export async function getMeApi() {
+  try {
+    const response = await httpClient.get('/auth/me');
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}

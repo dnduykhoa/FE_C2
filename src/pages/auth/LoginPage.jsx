@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { loginApi } from '../../services/auth.api';
-import { useAuthStore } from '../../store/authStore';
+import { getRoleName, useAuthStore } from '../../store/authStore';
 
 const schema = z.object({
   username: z.string().min(1, 'Vui lòng nhập tên đăng nhập'),
@@ -34,6 +34,13 @@ export default function LoginPage() {
     const data = result.data || {};
     setAuth({ token: data.token, user: data.user });
     toast.success('Đăng nhập thành công');
+
+    const roleName = getRoleName(data.user);
+    if (roleName === 'ADMIN' || roleName === 'MODERATOR') {
+      navigate('/admin');
+      return;
+    }
+
     navigate(location.state?.from || '/');
   }
 
@@ -55,7 +62,7 @@ export default function LoginPage() {
       </form>
       <div className="auth-links">
         <Link to="/auth/forgot-password">Quên mật khẩu?</Link>
-        <Link to="/auth/register">Chưa có tài khoản?</Link>
+        <Link to="/auth/register" className="auth-register-link">Tôi chưa có tài khoản → Đăng ký</Link>
       </div>
     </section>
   );
