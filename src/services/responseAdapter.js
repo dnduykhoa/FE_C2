@@ -29,7 +29,13 @@ const errorCodeMessageMap = {
   INVALID_PRODUCT_ID: 'Sản phẩm không hợp lệ.',
   INVALID_QUANTITY: 'Số lượng sản phẩm không hợp lệ.',
   ORDER_NOT_CANCELABLE: 'Đơn hàng này không thể hủy ở trạng thái hiện tại.',
-  ORDER_NOT_FOUND: 'Không tìm thấy đơn hàng.'
+  ORDER_NOT_FOUND: 'Không tìm thấy đơn hàng.',
+  PAYMENT_NOT_FOUND: 'Không tìm thấy thông tin thanh toán.',
+  INVALID_PAYMENT_STATUS: 'Trạng thái thanh toán không hợp lệ.',
+  MISSING_PRODUCT_ID: 'Thiếu sản phẩm cho thao tác này.',
+  INVALID_RESERVED_UNTIL: 'Thời gian giữ chỗ không hợp lệ.',
+  RESERVATION_NOT_FOUND: 'Không tìm thấy reservation.',
+  RESERVATION_NOT_EDITABLE: 'Reservation này không thể chỉnh sửa.'
 };
 
 export function normalizeError(error) {

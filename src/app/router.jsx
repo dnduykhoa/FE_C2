@@ -13,9 +13,13 @@ import ProductDetailPage from '../pages/public/ProductDetailPage';
 import ProductsPage from '../pages/public/ProductsPage';
 import CartPage from '../pages/user/CartPage';
 import CheckoutPage from '../pages/user/CheckoutPage';
+import MyReviewsPage from '../pages/user/MyReviewsPage';
 import OrderDetailPage from '../pages/user/OrderDetailPage';
 import OrdersPage from '../pages/user/OrdersPage';
+import PaymentDetailPage from '../pages/user/PaymentDetailPage';
+import PaymentsPage from '../pages/user/PaymentsPage';
 import ProfilePage from '../pages/user/ProfilePage';
+import ReservationsPage from '../pages/user/ReservationsPage';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +41,10 @@ const router = createBrowserRouter([
           { path: 'user/checkout', element: <CheckoutPage /> },
           { path: 'user/orders', element: <OrdersPage /> },
           { path: 'user/orders/:id', element: <OrderDetailPage /> },
+          { path: 'user/payments', element: <PaymentsPage /> },
+          { path: 'user/payments/:id', element: <PaymentDetailPage /> },
+          { path: 'user/reservations', element: <ReservationsPage /> },
+          { path: 'user/reviews', element: <MyReviewsPage /> },
           {
             element: <RequireRole roles={['ADMIN', 'MODERATOR']} />,
             children: [{ path: 'admin', element: <DashboardPage /> }]

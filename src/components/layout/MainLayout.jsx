@@ -25,6 +25,9 @@ export default function MainLayout() {
             <NavLink to="/products">Sản phẩm</NavLink>
             <NavLink to="/user/cart">Giỏ hàng</NavLink>
             <NavLink to="/user/orders">Đơn hàng</NavLink>
+            <NavLink to="/user/payments">Thanh toán</NavLink>
+            <NavLink to="/user/reservations">Reservation</NavLink>
+            <NavLink to="/user/reviews">Review của tôi</NavLink>
             <NavLink to="/auth/login">Đăng nhập</NavLink>
             <NavLink to="/auth/register">Đăng ký</NavLink>
             <NavLink to="/user/profile">Tài khoản</NavLink>

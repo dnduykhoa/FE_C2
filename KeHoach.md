@@ -454,7 +454,7 @@ Ngày cập nhật: 03/04/2026
 - [x] Giai đoạn 1 - Auth + hồ sơ + quyền truy cập
 - [x] Giai đoạn 2 - Public catalog và product detail
 - [x] Giai đoạn 3 - Cart + Checkout COD + Orders user
-- [ ] Giai đoạn 4 - Payments + Reservations + Reviews user
+- [x] Giai đoạn 4 - Payments + Reservations + Reviews user
 - [ ] Giai đoạn 5 - Admin core
 - [ ] Giai đoạn 6 - Support chat + moderation
 - [ ] Giai đoạn 7 - Hoàn thiện chất lượng
@@ -509,9 +509,35 @@ Ngày cập nhật: 03/04/2026
   - `/user/orders/:id`
 - Nối nút thêm vào giỏ từ trang danh sách sản phẩm và chi tiết sản phẩm.
 
+### Đã hoàn thành trong giai đoạn 4
+- Tạo service API `payments` cho user:
+  - lấy danh sách thanh toán của tôi (`GET /payments/my-payments`)
+  - lấy chi tiết thanh toán (`GET /payments/:id`)
+- Tạo service API `reservations` cho user:
+  - danh sách reservation
+  - tạo reservation
+  - cập nhật reservation
+  - hủy reservation
+- Mở rộng service API `reviews` cho user:
+  - lấy review của tôi
+  - tạo review
+  - sửa review
+  - xóa review
+- Hoàn thiện trang user:
+  - `Thanh toán của tôi` + `Chi tiết thanh toán`
+  - `Reservation của tôi` (CRUD theo trạng thái)
+  - `Review của tôi` (CRUD)
+- Cập nhật route private:
+  - `/user/payments`
+  - `/user/payments/:id`
+  - `/user/reservations`
+  - `/user/reviews`
+- Cập nhật menu điều hướng cho các khu vực stage 4.
+- Bổ sung map lỗi backend sang thông báo tiếng Việt cho các mã lỗi stage 4.
+
 ### Kiểm tra build
 - `npm install`: thành công.
 - `npm run build`: thành công.
 
 ### Bước tiếp theo
-- Triển khai giai đoạn 4 theo kế hoạch: Payments + Reservations + Reviews user.
+- Triển khai giai đoạn 5 theo kế hoạch: Admin core (category/product/inventory/order/payment).
