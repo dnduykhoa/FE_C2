@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [profileForm, setProfileForm] = useState(initialProfileForm);
   const [passwordForm, setPasswordForm] = useState(initialPasswordForm);
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [activeSection, setActiveSection] = useState('');
 
   useEffect(() => {
     setProfileForm({
@@ -74,7 +74,6 @@ export default function ProfilePage() {
       }
 
       toast.success('Đã tải ảnh đại diện');
-      setAvatarFile(null);
       setAuth({ token, user: result.data });
     }
   });
@@ -88,15 +87,14 @@ export default function ProfilePage() {
     });
   }
 
-  function handleAvatarUpload(event) {
-    event.preventDefault();
-
-    if (!avatarFile) {
-      toast.error('Vui lòng chọn file ảnh');
+  function handleAvatarFileChange(event) {
+    const nextFile = event.target.files?.[0] || null;
+    if (!nextFile) {
       return;
     }
 
-    uploadAvatarMutation.mutate(avatarFile);
+    uploadAvatarMutation.mutate(nextFile);
+    event.target.value = '';
   }
 
   function handlePasswordSubmit(event) {
@@ -121,132 +119,149 @@ export default function ProfilePage() {
 
   return (
     <section className="stack-gap">
-      <section className="paper-block stack-gap">
+      <section className="paper-block stack-gap profile-account-panel">
         <div>
           <h1>Hồ sơ tài khoản</h1>
-          <p className="muted-text">Tên đăng nhập và email đang được giữ ở chế độ chỉ đọc.</p>
         </div>
 
-        <div className="profile-grid">
-          <div>
-            <label>Tên đăng nhập</label>
-            <p>{user?.username || '-'}</p>
-          </div>
-          <div>
-            <label>Email</label>
-            <p>{user?.email || '-'}</p>
-          </div>
-          <div>
-            <label>Trạng thái</label>
-            <p>{user?.status ? 'Đang hoạt động' : 'Đang bị khóa'}</p>
-          </div>
-          <div>
-            <label>Số lần đăng nhập</label>
-            <p>{user?.loginCount ?? 0}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="paper-block stack-gap">
-        <h2>Chỉnh sửa hồ sơ</h2>
-        <div className="profile-avatar-panel">
+        <div className="profile-avatar-wrap">
           <img
             className="profile-avatar-preview"
             src={user?.avatarUrl || 'https://i.sstatic.net/l60Hf.png'}
             alt="Ảnh đại diện"
           />
-          <form className="stack-gap" onSubmit={handleAvatarUpload}>
+          <label className="avatar-camera-btn" htmlFor="avatarFileInput" aria-label="Thay đổi ảnh đại diện">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h6l2 3h3a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </label>
+          <input
+            id="avatarFileInput"
+            type="file"
+            accept="image/*"
+            className="avatar-file-input"
+            onChange={handleAvatarFileChange}
+            disabled={uploadAvatarMutation.isPending}
+          />
+        </div>
+
+        <div className="profile-details-vertical">
+          <div className="profile-detail-row">
+            <label>Tên đăng nhập</label>
+            <p>{user?.username || '-'}</p>
+          </div>
+          <div className="profile-detail-row">
+            <label>Họ tên</label>
+            <p>{user?.fullName || '-'}</p>
+          </div>
+          <div className="profile-detail-row">
+            <label>Email</label>
+            <p>{user?.email || '-'}</p>
+          </div>
+          <div className="profile-detail-row">
+            <label>Trạng thái</label>
+            <p>{user?.status ? 'Đang hoạt động' : 'Đang bị khóa'}</p>
+          </div>
+          <div className="profile-detail-row">
+            <label>Số lần đăng nhập</label>
+            <p>{user?.loginCount ?? 0}</p>
+          </div>
+          <div className="profile-detail-row">
+            <label>Ngày sinh</label>
+            <p>{user?.birthday ? dayjs(user.birthday).format('DD/MM/YYYY') : '-'}</p>
+          </div>
+        </div>
+        <div className="profile-action-row">
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => setActiveSection((prev) => (prev === 'profile' ? '' : 'profile'))}
+          >
+            Cập nhật hồ sơ
+          </button>
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => setActiveSection((prev) => (prev === 'password' ? '' : 'password'))}
+          >
+            Đổi mật khẩu
+          </button>
+        </div>
+
+        {activeSection === 'profile' ? (
+          <form className="stack-gap profile-form-panel" onSubmit={handleProfileSubmit}>
             <div className="form-grid">
-              <label htmlFor="avatarFile">Tải ảnh đại diện</label>
+              <label htmlFor="fullName">Họ tên</label>
               <input
-                id="avatarFile"
-                type="file"
-                accept="image/*"
-                onChange={(event) => setAvatarFile(event.target.files?.[0] || null)}
+                id="fullName"
+                type="text"
+                value={profileForm.fullName}
+                onChange={(event) => setProfileForm((prev) => ({ ...prev, fullName: event.target.value }))}
+                placeholder="Nhập họ tên"
               />
             </div>
+
+            <div className="form-grid">
+              <label htmlFor="birthday">Ngày sinh</label>
+              <input
+                id="birthday"
+                type="date"
+                value={profileForm.birthday}
+                onChange={(event) => setProfileForm((prev) => ({ ...prev, birthday: event.target.value }))}
+              />
+            </div>
+
             <div className="hero-actions">
-              <button className="btn secondary" type="submit" disabled={uploadAvatarMutation.isPending}>
-                Tải ảnh lên
+              <button className="btn primary" type="submit" disabled={updateProfileMutation.isPending}>
+                Lưu thay đổi hồ sơ
               </button>
             </div>
           </form>
-        </div>
+        ) : null}
 
-        <p className="muted-text">Ảnh đại diện được cập nhật qua thao tác tải file, không chỉnh bằng URL thủ công.</p>
+        {activeSection === 'password' ? (
+          <form className="stack-gap profile-form-panel" onSubmit={handlePasswordSubmit}>
+            <div className="form-grid">
+              <label htmlFor="currentPassword">Mật khẩu hiện tại</label>
+              <input
+                id="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))}
+                placeholder="Để trống nếu tài khoản chưa có mật khẩu"
+              />
+            </div>
 
-        <form className="stack-gap" onSubmit={handleProfileSubmit}>
-          <div className="form-grid">
-            <label htmlFor="fullName">Họ tên</label>
-            <input
-              id="fullName"
-              type="text"
-              value={profileForm.fullName}
-              onChange={(event) => setProfileForm((prev) => ({ ...prev, fullName: event.target.value }))}
-              placeholder="Nhập họ tên"
-            />
-          </div>
+            <div className="form-grid">
+              <label htmlFor="newPassword">Mật khẩu mới</label>
+              <input
+                id="newPassword"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
+                placeholder="Nhập mật khẩu mới"
+              />
+            </div>
 
-          <div className="form-grid">
-            <label htmlFor="birthday">Ngày sinh</label>
-            <input
-              id="birthday"
-              type="date"
-              value={profileForm.birthday}
-              onChange={(event) => setProfileForm((prev) => ({ ...prev, birthday: event.target.value }))}
-            />
-          </div>
+            <div className="form-grid">
+              <label htmlFor="confirmPassword">Nhập lại mật khẩu mới</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                placeholder="Nhập lại mật khẩu mới"
+              />
+            </div>
 
-          <div className="hero-actions">
-            <button className="btn primary" type="submit" disabled={updateProfileMutation.isPending}>
-              Lưu hồ sơ
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <section className="paper-block stack-gap">
-        <h2>Đổi mật khẩu</h2>
-        <form className="stack-gap" onSubmit={handlePasswordSubmit}>
-          <div className="form-grid">
-            <label htmlFor="currentPassword">Mật khẩu hiện tại</label>
-            <input
-              id="currentPassword"
-              type="password"
-              value={passwordForm.currentPassword}
-              onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))}
-              placeholder="Để trống nếu tài khoản chưa có mật khẩu"
-            />
-          </div>
-
-          <div className="form-grid">
-            <label htmlFor="newPassword">Mật khẩu mới</label>
-            <input
-              id="newPassword"
-              type="password"
-              value={passwordForm.newPassword}
-              onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
-              placeholder="Nhập mật khẩu mới"
-            />
-          </div>
-
-          <div className="form-grid">
-            <label htmlFor="confirmPassword">Nhập lại mật khẩu mới</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={passwordForm.confirmPassword}
-              onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
-              placeholder="Nhập lại mật khẩu mới"
-            />
-          </div>
-
-          <div className="hero-actions">
-            <button className="btn primary" type="submit" disabled={changePasswordMutation.isPending}>
-              Đổi mật khẩu
-            </button>
-          </div>
-        </form>
+            <div className="hero-actions">
+              <button className="btn primary" type="submit" disabled={changePasswordMutation.isPending}>
+                Xác nhận đổi mật khẩu
+              </button>
+            </div>
+          </form>
+        ) : null}
       </section>
     </section>
   );

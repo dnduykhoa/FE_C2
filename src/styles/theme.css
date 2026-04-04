@@ -649,11 +649,23 @@ textarea:focus {
   gap: 12px;
 }
 
+.profile-account-panel {
+  width: min(570px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .profile-avatar-panel {
   display: grid;
   grid-template-columns: 120px 1fr;
   gap: 16px;
   align-items: start;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
 }
 
 .profile-avatar-preview {
@@ -663,6 +675,60 @@ textarea:focus {
   object-fit: cover;
   border: 1px solid var(--line);
   background: #F8F2E9;
+}
+
+.avatar-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avatar-camera-btn {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--brand-primary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
+
+.avatar-camera-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.profile-details-vertical {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-detail-row {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.profile-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-form-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #F8F2E9;
+  padding: 14px;
 }
 
 .stack-gap {

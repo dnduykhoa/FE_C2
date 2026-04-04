@@ -19,7 +19,8 @@ export default defineConfig({
       '/payments': 'http://localhost:3000',
       '/reviews': 'http://localhost:3000',
       '/messages': 'http://localhost:3000',
-      '/support-chat': 'http://localhost:3000'
+      '/support-chat': 'http://localhost:3000',
+      '/uploads': 'http://localhost:3000'
     }
   }
 })
