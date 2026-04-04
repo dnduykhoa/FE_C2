@@ -598,13 +598,42 @@ textarea:focus {
   border-radius: 12px;
   background: linear-gradient(120deg, #e5d8c7, #f4ece0);
   margin-bottom: 10px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.thumb-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.products-page .product-card {
+  min-height: 420px;
+}
+
+.products-page .thumb-placeholder {
+  height: 250px;
 }
 
 .detail-thumb {
-  height: 260px;
+  width: min(450px, 100%);
+  height: 430px;
   border-radius: 12px;
-  background: linear-gradient(120deg, #ddc8b1, #f3e5d4);
-  margin-bottom: 16px;
+  background: #efe5d8;
+  margin: 0 auto 16px auto;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.detail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .muted-text {
@@ -627,8 +656,54 @@ textarea:focus {
 
 .detail-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 18px;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+.detail-grid > .paper-block:first-child {
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.detail-grid > .paper-block:first-child .detail-thumb {
+  margin: 0;
+}
+
+.detail-info {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detail-info h1,
+.detail-info .muted-text,
+.detail-info .price-text,
+.detail-info > p:not(.muted-text):not(.price-text) {
+  margin: 0;
+}
+
+.detail-info .price-text {
+  margin-top: 8px;
+}
+
+.detail-info > p:not(.muted-text):not(.price-text) {
+  margin-top: 6px;
+}
+
+.detail-actions {
+  margin-top: auto;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.detail-grid > .paper-block:last-child {
+  grid-column: 1 / -1;
 }
 
 .review-list {
@@ -647,6 +722,37 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
+}
+
+.payment-detail-grid {
+  grid-template-columns: calc(50% + 10mm) calc(50% - 10mm);
+}
+
+.payment-detail-grid > div:first-child {
+  max-width: none;
+}
+
+.payment-detail-grid > div:first-child p {
+  overflow-wrap: anywhere;
+}
+
+.payment-back-btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  width: fit-content;
+  justify-self: start;
+}
+
+.payment-detail-section label {
+  font-weight: 700;
+}
+
+.payment-detail-meta {
+  margin: 0;
+}
+
+.payment-detail-meta strong {
+  font-weight: 700;
 }
 
 .profile-account-panel {
@@ -731,6 +837,22 @@ textarea:focus {
   padding: 14px;
 }
 
+.admin-image-preview {
+  width: 100%;
+  max-width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: #F8F2E9;
+}
+
+.image-preview-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .stack-gap {
   display: grid;
   gap: 14px;
@@ -811,6 +933,36 @@ textarea:focus {
   gap: 12px;
 }
 
+.admin-product-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-product-thumb-wrap {
+  flex-shrink: 0;
+}
+
+.admin-product-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: #F8F2E9;
+  display: grid;
+  place-items: center;
+  color: var(--text-sub);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.admin-product-thumb-placeholder {
+  padding: 4px;
+  text-align: center;
+}
+
 .order-item-row {
   display: flex;
   align-items: center;
@@ -822,6 +974,31 @@ textarea:focus {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.payment-status-menu-wrap {
+  position: relative;
+}
+
+.payment-status-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 12;
+  min-width: 170px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-soft);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.payment-status-btn {
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .admin-shell {
@@ -1141,6 +1318,11 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  align-items: start;
+}
+
+.admin-access-grid .orders-list {
+  align-content: start;
 }
 
 .admin-user-card {
@@ -1166,6 +1348,9 @@ textarea:focus {
   text-align: left;
   display: grid;
   gap: 4px;
+  align-content: start;
+  justify-items: start;
+  align-self: start;
   font: inherit;
   cursor: pointer;
 }
@@ -1408,5 +1593,9 @@ textarea:focus {
   .order-card,
   .order-item-row {
     display: grid;
+  }
+
+  .payment-detail-grid {
+    grid-template-columns: 1fr;
   }
 }

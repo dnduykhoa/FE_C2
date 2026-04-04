@@ -1,7 +1,7 @@
-# Du Lieu Mau Cho Admin Nhap DB
+# Dữ Liệu Mẫu Cho Admin Nhập DB
 
-Tai lieu nay de admin nhap du lieu thu cong (qua UI, MongoDB Compass, Postman...).
-Khong phai script seed.
+Tài liệu này dùng để admin nhập dữ liệu thủ công qua UI, MongoDB Compass hoặc Postman.
+Không phải script seed.
 
 ## 1) Roles
 
@@ -11,118 +11,130 @@ Khong phai script seed.
 
 ## 2) Categories
 
-- Binh hoa gom
-- Bo am tra
-- Ly gom
-- Chen dia
-- Lo huong
-- Tuong gom trang tri
-- Do gom mini
-- Do gom qua tang
-- Do gom ban an
-- Do gom decor hien dai
+| name | description |
+|---|---|
+| Bình hoa gốm | Nhóm sản phẩm chuyên dùng để cắm hoa, trang trí bàn, phòng khách và không gian tiếp khách. |
+| Bộ ấm trà | Bộ đồ uống trà gốm nổi bật, phù hợp dùng làm quà tặng hoặc sử dụng trong không gian ấm trà truyền thống. |
+| Ly gốm | Các loại ly dùng uống cà phê, trà, sữa, nước uống nóng lạnh với chất liệu gốm bền đẹp. |
+| Chén đĩa | Nhóm chén, đĩa ăn cơ bản dùng trong bộ bàn ăn hằng ngày hoặc phục vụ ăn uống gia đình. |
+| Lọ hương | Sản phẩm phục vụ thờ cúng, thắp hương, trang trí bàn thờ và không gian tâm linh. |
+| Tượng gốm trang trí | Các mẫu tượng, decor gốm có hình dáng đẹp, dùng để trang trí nội thất và làm quà tặng. |
+| Đồ gốm mini | Sản phẩm gốm kích thước nhỏ, phù hợp trang trí kệ sách, bàn làm việc hoặc làm quà nhỏ. |
+| Đồ gốm quà tặng | Nhóm sản phẩm được chọn làm quà tặng, thường có bao bì đẹp và tính sang trọng. |
+| Đồ gốm bàn ăn | Các món đồ dùng cho mâm cơm gia đình, bao gồm chén, đĩa, tô, bát dùng hằng ngày. |
+| Đồ gốm decor hiện đại | Sản phẩm gốm có thiết kế tối giản, màu trung tính, phù hợp phong cách nội thất hiện đại. |
 
 ## 3) Products
 
-Mau du lieu de nhap (co the thay doi gia va mo ta):
+Dữ liệu mẫu để nhập, có thể thay đổi giá và mô tả theo thực tế:
 
 | name | sku | category | price | description | status |
 |---|---|---|---:|---|---|
-| Binh Hoa Men Ran Co Dien | BH-001 | Binh hoa gom | 420000 | Binh hoa men ran, phong cach co dien, hop decor phong khach | true |
-| Binh Hoa Gom Nau Dat Nung | BH-002 | Binh hoa gom | 350000 | Binh dat nung, tong nau am, phu hop cam hoa kho | true |
-| Bo Am Tra Bat Trang 01 | AT-001 | Bo am tra | 680000 | Bo am tra 6 mon, men trang, hoa van ve tay | true |
-| Bo Am Tra Men Lam | AT-002 | Bo am tra | 820000 | Men lam truyen thong, dung tich vua cho gia dinh | true |
-| Ly Gom Suc Uong Nong 350ml | LY-001 | Ly gom | 145000 | Ly gom men mo, giu nhiet tot, tay cam chac chan | true |
-| Ly Gom Men Cat Tinh Gian | LY-002 | Ly gom | 165000 | Tong mau trung tinh, phu hop phong cach toi gian | true |
-| Chen Com Gom Men Trang | CH-001 | Chen dia | 69000 | Chen an co ban, men trang ben dep | true |
-| Dia Tron Gom Ve Hoa Van | CH-002 | Chen dia | 119000 | Dia tron trang tri hoa van xanh co dien | true |
-| Lo Huong Gom Thu Cong | LH-001 | Lo huong | 210000 | Lo huong nho gon, dung cho khong gian tho cung | true |
-| Tuong Gom Chu Tieu Mini | TG-001 | Tuong gom trang tri | 189000 | Tuong gom mini trang tri ban lam viec | true |
+| Bình Hoa Men Rạn Cổ Điển | BH-001 | Bình hoa gốm | 420000 | Bình hoa men rạn, phong cách cổ điển, hợp decor phòng khách. | true |
+| Bình Hoa Gốm Nâu Đất Nung | BH-002 | Bình hoa gốm | 350000 | Bình đất nung, tông nâu ấm, phù hợp cắm hoa khô. | true |
+| Bộ Ấm Trà Bát Tràng 01 | AT-001 | Bộ ấm trà | 680000 | Bộ ấm trà 6 món, men trắng, hoa văn vẽ tay. | true |
+| Bộ Ấm Trà Men Lam | AT-002 | Bộ ấm trà | 820000 | Men lam truyền thống, dung tích vừa cho gia đình. | true |
+| Ly Gốm Sử Dụng Nóng 350ml | LY-001 | Ly gốm | 145000 | Ly gốm men mờ, giữ nhiệt tốt, tay cầm chắc chắn. | true |
+| Ly Gốm Men Cát Tinh Gọn | LY-002 | Ly gốm | 165000 | Tông màu trung tính, phù hợp phong cách tối giản. | true |
+| Chén Cơm Gốm Men Trắng | CH-001 | Chén đĩa | 69000 | Chén ăn cơ bản, men trắng bền đẹp. | true |
+| Đĩa Tròn Gốm Vẽ Hoa Văn | CH-002 | Chén đĩa | 119000 | Đĩa tròn trang trí hoa văn xanh cổ điển. | true |
+| Lọ Hương Gốm Thủ Công | LH-001 | Lọ hương | 210000 | Lọ hương nhỏ gọn, dùng cho không gian thờ cúng. | true |
+| Tượng Gốm Chú Tiểu Mini | TG-001 | Tượng gốm trang trí | 189000 | Tượng gốm mini trang trí bàn làm việc. | true |
 
 ## 4) Inventories
 
-Mau ton kho ban dau (gan theo SKU):
+Dữ liệu tồn kho ban đầu, gắn theo SKU (đúng với model hiện tại của hệ thống):
 
-| sku | quantity | reservedQuantity | soldQuantity |
+| sku | stock | reservedStock | minStockThreshold |
 |---|---:|---:|---:|
-| BH-001 | 120 | 0 | 0 |
-| BH-002 | 80 | 0 | 0 |
-| AT-001 | 60 | 0 | 0 |
-| AT-002 | 40 | 0 | 0 |
-| LY-001 | 200 | 0 | 0 |
-| LY-002 | 150 | 0 | 0 |
-| CH-001 | 300 | 0 | 0 |
-| CH-002 | 180 | 0 | 0 |
-| LH-001 | 90 | 0 | 0 |
-| TG-001 | 110 | 0 | 0 |
+| BH-001 | 120 | 0 | 20 |
+| BH-002 | 80 | 0 | 15 |
+| AT-001 | 60 | 0 | 10 |
+| AT-002 | 40 | 0 | 8 |
+| LY-001 | 200 | 0 | 30 |
+| LY-002 | 150 | 0 | 25 |
+| CH-001 | 300 | 0 | 40 |
+| CH-002 | 180 | 0 | 25 |
+| LH-001 | 90 | 0 | 12 |
+| TG-001 | 110 | 0 | 15 |
 
-## 5) Users (du lieu test)
+Quy đổi từ tên cột cũ sang hệ thống hiện tại:
+- `quantity` = `stock`
+- `reservedQuantity` = `reservedStock`
+- `soldQuantity`: hiện chưa lưu riêng trong bảng tồn kho, thường được suy ra từ dữ liệu đơn hàng/thanh toán.
 
-Luu y: password phai hash theo he thong khi tao qua API. Duoi day chi la du lieu logic.
+Vì sao form "Quản lý tồn kho" chỉ thấy 3 ô nhập?
+- Cột `sku` được thay bằng ô chọn sản phẩm (theo `productId`) trên form.
+- `reservedStock` không nhập tay khi tạo mới, hệ thống tự tăng/giảm theo luồng đặt hàng.
+- Do đó form tạo tồn kho chỉ nhập: sản phẩm + `stock` + `minStockThreshold`.
+
+## 5) Users (dữ liệu test)
+
+Lưu ý: password phải được hash theo hệ thống khi tạo qua API. Dưới đây chỉ là dữ liệu logic.
 
 | username | email | fullName | role | status |
 |---|---|---|---|---|
-| admin01 | admin01@gomxua.vn | Quan tri vien 01 | ADMIN | true |
-| mod01 | mod01@gomxua.vn | Dieu phoi vien 01 | MODERATOR | true |
-| user01 | user01@gmail.com | Nguyen Minh An | USER | true |
-| user02 | user02@gmail.com | Tran Bao Chau | USER | true |
+| admin01 | admin01@gomxua.vn | Quản trị viên 01 | ADMIN | true |
+| mod01 | mod01@gomxua.vn | Điều phối viên 01 | MODERATOR | true |
+| user01 | user01@gmail.com | Nguyễn Minh An | USER | true |
+| user02 | user02@gmail.com | Trần Bảo Châu | USER | true |
 
-## 6) Mau du lieu Reservation
+## 6) Mẫu dữ liệu Reservation
 
 - status: PENDING, CONFIRMED, CANCELLED, EXPIRED
-- note mau:
-  - Giu den toi mai
-  - Dat truoc de tang sinh nhat
-  - Se thanh toan khi den cua hang
+- note mẫu:
+  - Giữ đến tối mai
+  - Đặt trước để tặng sinh nhật
+  - Sẽ thanh toán khi đến cửa hàng
 
-## 7) Mau du lieu Review
+## 7) Mẫu dữ liệu Review
 
 - rating: 1 -> 5
 - status: APPROVED, PENDING, REJECTED
-- comment mau:
-  - San pham dep, dung mo ta, dong goi ky
-  - Men gom dep, cam tay chac, rat hai long
-  - Mau sac hoi dam hon anh mot chut nhung van dep
+- comment mẫu:
+  - Sản phẩm đẹp, đúng mô tả, đóng gói kỹ.
+  - Men gốm đẹp, cầm tay chắc, rất hài lòng.
+  - Màu sắc hơi đậm hơn ảnh một chút nhưng vẫn đẹp.
 
-## 8) Mau du lieu Support Chat
+## 8) Mẫu dữ liệu Support Chat
 
-### Subject goi y
-- Can ho tro doi tra san pham
-- Don hang giao cham
-- Muon dat so luong lon cho su kien
-- San pham bi nut vo khi giao
+### Chủ đề gợi ý
+- Cần hỗ trợ đổi trả sản phẩm
+- Đơn hàng giao chậm
+- Muốn đặt số lượng lớn cho sự kiện
+- Sản phẩm bị nứt vỡ khi giao
 
-### Priority
+### Mức ưu tiên
 - low
 - normal
 - high
 - urgent
 
-### Noi dung mo dau mau
-- Toi muon hoi ve chinh sach doi tra trong 7 ngay.
-- Don hang cua toi da qua ngay du kien nhung chua nhan duoc.
-- Toi can dat 50 bo ly gom cho su kien cong ty.
+### Nội dung mở đầu mẫu
+- Tôi muốn hỏi về chính sách đổi trả trong 7 ngày.
+- Đơn hàng của tôi đã quá ngày dự kiến nhưng chưa nhận được.
+- Tôi cần đặt 50 bộ ly gốm cho sự kiện công ty.
 
-## 9) Gia tri trang thai de admin quan ly
+## 9) Giá trị trạng thái để admin quản lý
 
-### Order status
+### Trạng thái đơn hàng
 - PENDING
 - PAID
 - SHIPPED
 - COMPLETED
 - CANCELLED
 
-### Payment status
+### Trạng thái thanh toán
 - PENDING
 - PAID
 - FAILED
 - REFUNDED
 - CANCELLED
 
-## 10) Ghi chu khi nhap du lieu
+## 10) Ghi chú khi nhập dữ liệu
 
-- Uu tien nhap theo thu tu: Roles -> Categories -> Products -> Inventories -> Users.
-- Product nen co SKU duy nhat.
-- Gia tri tien nen de kieu so nguyen (VND).
-- Cac truong status de true khi muon hien thi ra frontend.
-- Khong can nhap qua script, co the nhap tay bang cong cu quan tri DB.
+- Ưu tiên nhập theo thứ tự: Roles -> Categories -> Products -> Inventories -> Users.
+- Sản phẩm nên có SKU duy nhất.
+- Giá trị tiền nên để kiểu số nguyên (VND).
+- Các trường status để `true` khi muốn hiển thị ra frontend.
+- Không cần nhập qua script, có thể nhập tay bằng công cụ quản trị DB.

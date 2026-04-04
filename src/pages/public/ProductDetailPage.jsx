@@ -6,9 +6,14 @@ import { Link, useParams } from 'react-router-dom';
 import { addToCartApi } from '../../services/carts.api';
 import { getProductDetailApi } from '../../services/products.api';
 import { getReviewsByProductApi } from '../../services/reviews.api';
+import { resolveMediaUrl } from '../../services/mediaUrl';
+import { getRoleName, useAuthStore } from '../../store/authStore';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const user = useAuthStore((state) => state.user);
+  const roleName = getRoleName(user);
+  const isEndUser = roleName === 'USER';
 
   const productQuery = useQuery({
     queryKey: ['product-detail', id],
@@ -52,21 +57,29 @@ export default function ProductDetailPage() {
   return (
     <section className="detail-grid">
       <article className="paper-block">
-        <div className="detail-thumb" />
-        <h1>{product.name}</h1>
-        <p className="muted-text">{product.category?.name || 'Không rõ danh mục'}</p>
-        <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
-        <p>{product.description || 'Sản phẩm gốm mang hơi hướng làng nghề truyền thống.'}</p>
-        <div className="hero-actions">
-          <button
-            className="btn primary"
-            type="button"
-            onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
-            disabled={addToCartMutation.isPending}
-          >
-            Thêm vào giỏ
-          </button>
-          <Link className="btn secondary" to="/products">Quay lại</Link>
+        <div className="detail-thumb">
+          {Array.isArray(product.images) && product.images[0] ? (
+            <img src={resolveMediaUrl(product.images[0])} alt={product.name || 'Sản phẩm'} />
+          ) : null}
+        </div>
+        <div className="detail-info">
+          <h1>{product.name}</h1>
+          <p className="muted-text">{product.category?.name || 'Không rõ danh mục'}</p>
+          <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
+          <p>{product.description || 'Sản phẩm gốm mang hơi hướng làng nghề truyền thống.'}</p>
+          <div className="hero-actions detail-actions">
+            {isEndUser ? (
+              <button
+                className="btn primary"
+                type="button"
+                onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
+                disabled={addToCartMutation.isPending}
+              >
+                Thêm vào giỏ
+              </button>
+            ) : null}
+            <Link className="btn secondary" to="/products">Quay lại</Link>
+          </div>
         </div>
       </article>
 

@@ -6,8 +6,14 @@ import { Link } from 'react-router-dom';
 import { addToCartApi } from '../../services/carts.api';
 import { getCategoriesApi } from '../../services/categories.api';
 import { getProductsApi, searchProductsApi } from '../../services/products.api';
+import { resolveMediaUrl } from '../../services/mediaUrl';
+import { getRoleName, useAuthStore } from '../../store/authStore';
 
 export default function ProductsPage() {
+  const user = useAuthStore((state) => state.user);
+  const roleName = getRoleName(user);
+  const isEndUser = roleName === 'USER';
+
   const [filters, setFilters] = useState({
     page: 1,
     limit: 8,
@@ -62,7 +68,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <section>
+    <section className="products-page">
       <div className="paper-block">
         <h1>Sản phẩm gốm cổ</h1>
         <div className="filter-grid">
@@ -99,19 +105,25 @@ export default function ProductsPage() {
       <div className="product-grid">
         {products.map((product) => (
           <article key={product.id} className="product-card">
-            <div className="thumb-placeholder" />
+            <div className="thumb-placeholder">
+              {Array.isArray(product.images) && product.images[0] ? (
+                <img src={resolveMediaUrl(product.images[0])} alt={product.name || 'Sản phẩm'} />
+              ) : null}
+            </div>
             <h3>{product.name}</h3>
             <p className="muted-text">{product.category?.name || 'Không rõ danh mục'}</p>
             <p className="price-text">{Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
             <div className="hero-actions">
-              <button
-                className="btn primary"
-                type="button"
-                onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
-                disabled={addToCartMutation.isPending}
-              >
-                Thêm vào giỏ
-              </button>
+              {isEndUser ? (
+                <button
+                  className="btn primary"
+                  type="button"
+                  onClick={() => addToCartMutation.mutate({ productId: product.id || product._id, quantity: 1 })}
+                  disabled={addToCartMutation.isPending}
+                >
+                  Thêm vào giỏ
+                </button>
+              ) : null}
               <Link className="btn secondary" to={`/products/${product.id}`}>Xem chi tiết</Link>
             </div>
           </article>

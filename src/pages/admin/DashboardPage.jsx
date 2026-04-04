@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -41,7 +41,7 @@ import {
   increaseStockApi
 } from '../../services/inventories.api';
 import { getAllPaymentsAdminApi, updatePaymentStatusApi } from '../../services/payments.api';
-import { updateOrderStatusApi } from '../../services/orders.api';
+import { getAllOrdersAdminApi, updateOrderStatusApi } from '../../services/orders.api';
 import { createRoleApi, deleteRoleApi, getRolesApi, updateRoleApi } from '../../services/roles.api';
 import { getUsersApi, updateUserRoleApi } from '../../services/users.api';
 import {
@@ -56,6 +56,7 @@ import { deleteReviewAdminApi, getAllReviewsAdminApi } from '../../services/revi
 import { logoutApi } from '../../services/auth.api';
 import { getRoleName, useAuthStore } from '../../store/authStore';
 import DataStatePanel from '../../components/common/DataStatePanel';
+import { resolveMediaUrl } from '../../services/mediaUrl';
 
 const navItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
@@ -65,12 +66,51 @@ const navItems = [
   { id: 'orders', icon: ShoppingCart, label: 'Đơn hàng' },
   { id: 'payments', icon: Wallet, label: 'Thanh toán' },
   { id: 'support', icon: MessageCircle, label: 'Hỗ trợ chat' },
-  { id: 'reviews', icon: Star, label: 'Review moderation' },
+  { id: 'reviews', icon: Star, label: 'Kiểm duyệt đánh giá' },
   { id: 'access', icon: ShieldCheck, label: 'Phân quyền' }
 ];
 
+function getPaymentStatusLabel(status) {
+  const value = String(status || '').toUpperCase();
+  if (value === 'PAID') return 'Đã thanh toán';
+  if (value === 'PENDING') return 'Chờ xử lý';
+  if (value === 'FAILED') return 'Thất bại';
+  if (value === 'REFUNDED') return 'Đã hoàn tiền';
+  if (value === 'CANCELLED') return 'Đã hủy';
+  return value || 'Không xác định';
+}
+
+function getOrderStatusLabel(status) {
+  const value = String(status || '').toUpperCase();
+  if (value === 'PENDING') return 'Chờ xử lý';
+  if (value === 'PAID') return 'Đã thanh toán';
+  if (value === 'SHIPPED') return 'Đang giao';
+  if (value === 'COMPLETED') return 'Hoàn thành';
+  if (value === 'CANCELLED') return 'Đã hủy';
+  if (value === 'FAILED') return 'Thất bại';
+  return value || 'Không xác định';
+}
+
+function getSupportStatusLabel(status) {
+  const value = String(status || '').toLowerCase();
+  if (value === 'open') return 'Mới mở';
+  if (value === 'pending') return 'Đang xử lý';
+  if (value === 'resolved') return 'Đã xử lý';
+  if (value === 'closed') return 'Đã đóng';
+  return status || 'Không xác định';
+}
+
+function getPriorityLabel(priority) {
+  const value = String(priority || '').toLowerCase();
+  if (value === 'low') return 'Thấp';
+  if (value === 'normal') return 'Bình thường';
+  if (value === 'high') return 'Cao';
+  if (value === 'urgent') return 'Khẩn cấp';
+  return priority || 'Không xác định';
+}
+
 function emptyCategoryForm() {
-  return { id: '', name: '', description: '', imageUrl: '', status: true };
+  return { id: '', name: '', description: '', status: true };
 }
 
 function emptyProductForm() {
@@ -81,7 +121,7 @@ function emptyProductForm() {
     categoryId: '',
     sku: '',
     description: '',
-    images: '',
+    images: [],
     weightInGram: '',
     status: true
   };
@@ -98,14 +138,32 @@ function emptyRoleForm() {
 function normalizePaymentStatus(status) {
   const value = String(status || '').toUpperCase();
   if (value === 'PAID') {
-    return { className: 'status-success', label: 'Đã thanh toán' };
+    return { className: 'status-success', label: getPaymentStatusLabel(value) };
   }
 
   if (value === 'CANCELLED' || value === 'FAILED' || value === 'REFUNDED') {
-    return { className: 'status-error', label: value };
+    return { className: 'status-error', label: getPaymentStatusLabel(value) };
   }
 
-  return { className: 'status-pending', label: 'Chờ xử lý' };
+  return { className: 'status-pending', label: getPaymentStatusLabel(value) };
+}
+
+function normalizeOrderStatus(status) {
+  const value = String(status || '').toUpperCase();
+
+  if (value === 'COMPLETED' || value === 'PAID') {
+    return { className: 'status-success', label: getOrderStatusLabel(value) };
+  }
+
+  if (value === 'CANCELLED' || value === 'FAILED') {
+    return { className: 'status-error', label: getOrderStatusLabel(value) };
+  }
+
+  if (value === 'SHIPPED') {
+    return { className: 'status-pending', label: getOrderStatusLabel(value) };
+  }
+
+  return { className: 'status-pending', label: getOrderStatusLabel(value) };
 }
 
 export default function DashboardPage() {
@@ -120,22 +178,26 @@ export default function DashboardPage() {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [showInventoryForm, setShowInventoryForm] = useState(false);
-  const [showOrderForm, setShowOrderForm] = useState(false);
   const [showRoleForm, setShowRoleForm] = useState(false);
   const [supportFilter, setSupportFilter] = useState({ status: '', assigned: 'mine' });
   const [selectedSupportConversationId, setSelectedSupportConversationId] = useState('');
   const [supportReplyContent, setSupportReplyContent] = useState('');
   const [supportStatus, setSupportStatus] = useState('pending');
+  const [openPaymentMenuId, setOpenPaymentMenuId] = useState('');
+  const [openOrderMenuId, setOpenOrderMenuId] = useState('');
+  const [editingInventoryId, setEditingInventoryId] = useState('');
   const [categoryForm, setCategoryForm] = useState(emptyCategoryForm());
   const [productForm, setProductForm] = useState(emptyProductForm());
+  const [productImageFiles, setProductImageFiles] = useState([]);
   const [inventoryForm, setInventoryForm] = useState(emptyInventoryForm());
+  const [adjustInventoryForm, setAdjustInventoryForm] = useState({ productId: '', newStock: '', minStockThreshold: '' });
   const [roleForm, setRoleForm] = useState(emptyRoleForm());
-  const [orderStatusForm, setOrderStatusForm] = useState({ orderId: '', status: 'PENDING' });
 
   const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategoriesApi });
   const productsQuery = useQuery({ queryKey: ['products', 'admin-core'], queryFn: () => getProductsApi({ page: 1, limit: 50 }) });
   const inventoriesQuery = useQuery({ queryKey: ['inventories', 'admin-core'], queryFn: () => getInventoriesApi({ page: 1, limit: 50 }) });
   const paymentsQuery = useQuery({ queryKey: ['payments', 'admin-all'], queryFn: () => getAllPaymentsAdminApi({ page: 1, limit: 50 }) });
+  const ordersQuery = useQuery({ queryKey: ['orders', 'admin-all'], queryFn: () => getAllOrdersAdminApi({ page: 1, limit: 100 }) });
   const rolesQuery = useQuery({ queryKey: ['roles'], queryFn: getRolesApi });
   const usersQuery = useQuery({ queryKey: ['users', 'admin-management'], queryFn: getUsersApi });
   const supportConversationsQuery = useQuery({
@@ -148,6 +210,7 @@ export default function DashboardPage() {
   const products = productsQuery.data?.data || [];
   const inventories = inventoriesQuery.data?.data || [];
   const payments = paymentsQuery.data?.data || [];
+  const adminOrders = ordersQuery.data?.data || [];
   const roles = rolesQuery.data?.data || [];
   const users = usersQuery.data?.data || [];
   const supportConversationsResult = supportConversationsQuery.data;
@@ -157,7 +220,7 @@ export default function DashboardPage() {
   const adminName = user?.fullName || user?.username || 'Người dùng';
   const roleName = getRoleName(user);
   const isAdmin = ['ADMIN', 'MODERATOR'].includes(roleName);
-  const adminDisplayName = user?.fullName || user?.username || 'Admin User';
+  const adminDisplayName = user?.fullName || user?.username || 'Quản trị viên';
 
   const activeSupportConversationId = selectedSupportConversationId || supportConversations[0]?._id || supportConversations[0]?.id || '';
   const supportMessagesQuery = useQuery({
@@ -166,6 +229,38 @@ export default function DashboardPage() {
     enabled: Boolean(activeSupportConversationId)
   });
   const supportMessagesResult = supportMessagesQuery.data;
+
+  const productImagePreviews = useMemo(() => {
+    return productImageFiles.map((file) => URL.createObjectURL(file));
+  }, [productImageFiles]);
+
+  useEffect(() => {
+    return () => {
+      productImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, [productImagePreviews]);
+
+  useEffect(() => {
+    if (!openPaymentMenuId && !openOrderMenuId) {
+      return undefined;
+    }
+
+    function handleOutsideClick(event) {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+
+      if (!event.target.closest('.payment-status-menu-wrap, .order-status-menu-wrap')) {
+        setOpenPaymentMenuId('');
+        setOpenOrderMenuId('');
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [openPaymentMenuId, openOrderMenuId]);
 
   function getOrderIdFromPayment(payment) {
     const rawOrder = payment?.order;
@@ -177,11 +272,6 @@ export default function DashboardPage() {
     }
     return rawOrder._id || rawOrder.id || '';
   }
-
-  const orderIdsFromPayments = useMemo(() => {
-    const ids = payments.map((payment) => getOrderIdFromPayment(payment)).filter(Boolean);
-    return [...new Set(ids.map(String))];
-  }, [payments]);
 
   const stats = useMemo(() => {
     const totalRevenue = payments
@@ -243,8 +333,7 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã tạo danh mục');
-      setCategoryForm(emptyCategoryForm());
-      setShowCategoryForm(false);
+      resetCategoryForm();
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   });
@@ -257,8 +346,7 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã cập nhật danh mục');
-      setCategoryForm(emptyCategoryForm());
-      setShowCategoryForm(false);
+      resetCategoryForm();
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   });
@@ -283,8 +371,7 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã tạo sản phẩm');
-      setProductForm(emptyProductForm());
-      setShowProductForm(false);
+      resetProductForm();
       queryClient.invalidateQueries({ queryKey: ['products'] });
     }
   });
@@ -297,8 +384,7 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã cập nhật sản phẩm');
-      setProductForm(emptyProductForm());
-      setShowProductForm(false);
+      resetProductForm();
       queryClient.invalidateQueries({ queryKey: ['products'] });
     }
   });
@@ -361,6 +447,8 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã điều chỉnh tồn kho');
+      setEditingInventoryId('');
+      setAdjustInventoryForm({ productId: '', newStock: '', minStockThreshold: '' });
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
     }
   });
@@ -385,8 +473,10 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã cập nhật trạng thái đơn hàng');
-      setShowOrderForm(false);
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setOpenOrderMenuId('');
+      queryClient.invalidateQueries({ queryKey: ['orders', 'admin-all'] });
+      queryClient.invalidateQueries({ queryKey: ['payments', 'admin-all'] });
+      queryClient.invalidateQueries({ queryKey: ['inventories', 'admin-core'] });
     }
   });
 
@@ -398,6 +488,7 @@ export default function DashboardPage() {
         return;
       }
       toast.success('Đã cập nhật trạng thái thanh toán');
+      setOpenPaymentMenuId('');
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
     }
@@ -407,10 +498,10 @@ export default function DashboardPage() {
     mutationFn: createRoleApi,
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể tạo role');
+        toast.error(result.message || 'Không thể tạo vai trò');
         return;
       }
-      toast.success('Đã tạo role');
+      toast.success('Đã tạo vai trò');
       setRoleForm(emptyRoleForm());
       setShowRoleForm(false);
       queryClient.invalidateQueries({ queryKey: ['roles'] });
@@ -421,10 +512,10 @@ export default function DashboardPage() {
     mutationFn: ({ id, payload }) => updateRoleApi(id, payload),
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể cập nhật role');
+        toast.error(result.message || 'Không thể cập nhật vai trò');
         return;
       }
-      toast.success('Đã cập nhật role');
+      toast.success('Đã cập nhật vai trò');
       setRoleForm(emptyRoleForm());
       setShowRoleForm(false);
       queryClient.invalidateQueries({ queryKey: ['roles'] });
@@ -435,10 +526,10 @@ export default function DashboardPage() {
     mutationFn: deleteRoleApi,
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể xóa role');
+        toast.error(result.message || 'Không thể xóa vai trò');
         return;
       }
-      toast.success('Đã xóa role');
+      toast.success('Đã xóa vai trò');
       queryClient.invalidateQueries({ queryKey: ['roles'] });
     }
   });
@@ -447,10 +538,10 @@ export default function DashboardPage() {
     mutationFn: ({ id, payload }) => updateUserRoleApi(id, payload),
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể phân quyền cho user');
+        toast.error(result.message || 'Không thể phân quyền cho người dùng');
         return;
       }
-      toast.success('Đã cập nhật role cho user');
+      toast.success('Đã cập nhật vai trò cho người dùng');
       queryClient.invalidateQueries({ queryKey: ['users'] });
     }
   });
@@ -459,10 +550,10 @@ export default function DashboardPage() {
     mutationFn: assignConversationApi,
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể nhận ticket');
+        toast.error(result.message || 'Không thể nhận yêu cầu');
         return;
       }
-      toast.success('Đã nhận ticket hỗ trợ');
+      toast.success('Đã nhận yêu cầu hỗ trợ');
       queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
       queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages'] });
     }
@@ -486,10 +577,10 @@ export default function DashboardPage() {
     mutationFn: ({ id, payload }) => updateConversationStatusApi(id, payload),
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể cập nhật trạng thái ticket');
+        toast.error(result.message || 'Không thể cập nhật trạng thái yêu cầu');
         return;
       }
-      toast.success('Đã cập nhật trạng thái ticket');
+      toast.success('Đã cập nhật trạng thái yêu cầu');
       queryClient.invalidateQueries({ queryKey: ['support', 'admin-conversations'] });
       queryClient.invalidateQueries({ queryKey: ['support', 'admin-messages', activeSupportConversationId] });
     }
@@ -519,7 +610,18 @@ export default function DashboardPage() {
     }
   });
 
-  function submitCategory(event) {
+  function resetCategoryForm() {
+    setCategoryForm(emptyCategoryForm());
+    setShowCategoryForm(false);
+  }
+
+  function resetProductForm() {
+    setProductForm(emptyProductForm());
+    setProductImageFiles([]);
+    setShowProductForm(false);
+  }
+
+  async function submitCategory(event) {
     event.preventDefault();
     if (!categoryForm.name.trim()) {
       toast.error('Tên danh mục là bắt buộc');
@@ -529,7 +631,6 @@ export default function DashboardPage() {
     const payload = {
       name: categoryForm.name.trim(),
       description: categoryForm.description.trim(),
-      imageUrl: categoryForm.imageUrl.trim(),
       status: Boolean(categoryForm.status)
     };
 
@@ -540,23 +641,35 @@ export default function DashboardPage() {
     createCategoryMutation.mutate(payload);
   }
 
-  function submitProduct(event) {
+  async function submitProduct(event) {
     event.preventDefault();
     if (!productForm.name.trim() || !productForm.categoryId || !Number(productForm.price)) {
       toast.error('Tên, danh mục và giá sản phẩm là bắt buộc');
       return;
     }
 
-    const payload = {
-      name: productForm.name.trim(),
-      price: Number(productForm.price),
-      categoryId: productForm.categoryId,
-      sku: productForm.sku.trim(),
-      description: productForm.description.trim(),
-      images: productForm.images ? productForm.images.split(',').map((item) => item.trim()).filter(Boolean) : [],
-      weightInGram: productForm.weightInGram ? Number(productForm.weightInGram) : undefined,
-      status: Boolean(productForm.status)
-    };
+    if (!productImageFiles.length && (!Array.isArray(productForm.images) || productForm.images.length === 0) && !productForm.id) {
+      toast.error('Vui lòng chọn ít nhất một ảnh sản phẩm');
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append('name', productForm.name.trim());
+    payload.append('price', String(Number(productForm.price)));
+    payload.append('categoryId', productForm.categoryId);
+    payload.append('sku', productForm.sku.trim());
+    payload.append('description', productForm.description.trim());
+    payload.append('status', String(Boolean(productForm.status)));
+
+    if (productForm.weightInGram !== '') {
+      payload.append('weightInGram', String(Number(productForm.weightInGram)));
+    }
+
+    if (productImageFiles.length > 0) {
+      productImageFiles.forEach((file) => payload.append('images', file));
+    } else {
+      payload.append('images', JSON.stringify(productForm.images || []));
+    }
 
     if (productForm.id) {
       updateProductMutation.mutate({ id: productForm.id, payload });
@@ -579,23 +692,10 @@ export default function DashboardPage() {
     });
   }
 
-  function submitOrderStatus(event) {
-    event.preventDefault();
-    if (!orderStatusForm.orderId.trim()) {
-      toast.error('Vui lòng nhập mã đơn hàng');
-      return;
-    }
-
-    updateOrderStatusMutation.mutate({
-      id: orderStatusForm.orderId.trim(),
-      payload: { status: orderStatusForm.status }
-    });
-  }
-
   function submitRole(event) {
     event.preventDefault();
     if (!roleForm.name.trim()) {
-      toast.error('Tên role là bắt buộc');
+      toast.error('Tên vai trò là bắt buộc');
       return;
     }
 
@@ -610,6 +710,51 @@ export default function DashboardPage() {
     }
 
     createRoleMutation.mutate(payload);
+  }
+
+  function startAdjustInventory(inventory) {
+    const productId = inventory?.product?._id || inventory?.product?.id || inventory?.product || '';
+    setEditingInventoryId(inventory.id);
+    setAdjustInventoryForm({
+      productId: String(productId),
+      newStock: String(Number(inventory.stock || 0)),
+      minStockThreshold: String(Number(inventory.minStockThreshold || 0))
+    });
+  }
+
+  function cancelAdjustInventory() {
+    setEditingInventoryId('');
+    setAdjustInventoryForm({ productId: '', newStock: '', minStockThreshold: '' });
+  }
+
+  function submitAdjustInventory(event) {
+    event.preventDefault();
+
+    const newStock = Number(adjustInventoryForm.newStock);
+    const minStockThreshold = adjustInventoryForm.minStockThreshold === ''
+      ? 0
+      : Number(adjustInventoryForm.minStockThreshold);
+
+    if (!adjustInventoryForm.productId) {
+      toast.error('Không xác định được sản phẩm để điều chỉnh');
+      return;
+    }
+
+    if (!Number.isFinite(newStock) || newStock < 0) {
+      toast.error('Tồn kho mới phải là số lớn hơn hoặc bằng 0');
+      return;
+    }
+
+    if (!Number.isFinite(minStockThreshold) || minStockThreshold < 0) {
+      toast.error('Ngưỡng tối thiểu phải là số lớn hơn hoặc bằng 0');
+      return;
+    }
+
+    adjustStockMutation.mutate({
+      productId: adjustInventoryForm.productId,
+      newStock,
+      minStockThreshold
+    });
   }
 
   function resolveRoleName(role) {
@@ -665,7 +810,6 @@ export default function DashboardPage() {
                   <th>Ngày tạo</th>
                   <th>Tổng tiền</th>
                   <th>Trạng thái</th>
-                  <th style={{ textAlign: 'right' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -680,11 +824,6 @@ export default function DashboardPage() {
                       <td>{Number(payment.amount || 0).toLocaleString('vi-VN')} ₫</td>
                       <td>
                         <span className={`status-badge ${status.className}`}>{status.label}</span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button type="button" className="mini-icon-btn" aria-label="Xem thêm">
-                          <MoreVertical size={16} />
-                        </button>
                       </td>
                     </tr>
                   );
@@ -707,7 +846,8 @@ export default function DashboardPage() {
             type="button"
             onClick={() => {
               if (showCategoryForm) {
-                setCategoryForm(emptyCategoryForm());
+                resetCategoryForm();
+                return;
               }
               setShowCategoryForm((prev) => !prev);
             }}
@@ -720,7 +860,6 @@ export default function DashboardPage() {
           <form className="stack-gap" onSubmit={submitCategory}>
             <input type="text" placeholder="Tên danh mục" value={categoryForm.name} onChange={(event) => setCategoryForm((prev) => ({ ...prev, name: event.target.value }))} />
             <textarea rows={3} placeholder="Mô tả" value={categoryForm.description} onChange={(event) => setCategoryForm((prev) => ({ ...prev, description: event.target.value }))} />
-            <input type="text" placeholder="Image URL" value={categoryForm.imageUrl} onChange={(event) => setCategoryForm((prev) => ({ ...prev, imageUrl: event.target.value }))} />
             <label>
               <input type="checkbox" checked={Boolean(categoryForm.status)} onChange={(event) => setCategoryForm((prev) => ({ ...prev, status: event.target.checked }))} />
               {' '}Đang hoạt động
@@ -731,8 +870,7 @@ export default function DashboardPage() {
                 className="btn secondary"
                 type="button"
                 onClick={() => {
-                  setCategoryForm(emptyCategoryForm());
-                  setShowCategoryForm(false);
+                  resetCategoryForm();
                 }}
               >
                 Hủy
@@ -757,7 +895,6 @@ export default function DashboardPage() {
                       id: category.id,
                       name: category.name || '',
                       description: category.description || '',
-                      imageUrl: category.imageUrl || '',
                       status: category.status !== false
                     });
                     setShowCategoryForm(true);
@@ -784,7 +921,8 @@ export default function DashboardPage() {
             type="button"
             onClick={() => {
               if (showProductForm) {
-                setProductForm(emptyProductForm());
+                resetProductForm();
+                return;
               }
               setShowProductForm((prev) => !prev);
             }}
@@ -803,7 +941,29 @@ export default function DashboardPage() {
             </select>
             <input type="text" placeholder="SKU" value={productForm.sku} onChange={(event) => setProductForm((prev) => ({ ...prev, sku: event.target.value }))} />
             <textarea rows={3} placeholder="Mô tả" value={productForm.description} onChange={(event) => setProductForm((prev) => ({ ...prev, description: event.target.value }))} />
-            <input type="text" placeholder="Image URLs (phân tách bằng dấu phẩy)" value={productForm.images} onChange={(event) => setProductForm((prev) => ({ ...prev, images: event.target.value }))} />
+            <div className="form-grid">
+              <label htmlFor="productImages">Ảnh sản phẩm</label>
+              <input
+                id="productImages"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => setProductImageFiles(Array.from(event.target.files || []))}
+              />
+            </div>
+            {productImagePreviews.length > 0 ? (
+              <div className="image-preview-grid">
+                {productImagePreviews.map((preview) => (
+                  <img key={preview} className="admin-image-preview" src={preview} alt={productForm.name || 'Sản phẩm'} />
+                ))}
+              </div>
+            ) : Array.isArray(productForm.images) && productForm.images.length > 0 ? (
+              <div className="image-preview-grid">
+                {productForm.images.map((imageUrl) => (
+                  <img key={imageUrl} className="admin-image-preview" src={resolveMediaUrl(imageUrl)} alt={productForm.name || 'Sản phẩm'} />
+                ))}
+              </div>
+            ) : null}
             <input type="number" placeholder="Khối lượng (gram)" value={productForm.weightInGram} onChange={(event) => setProductForm((prev) => ({ ...prev, weightInGram: event.target.value }))} />
             <label>
               <input type="checkbox" checked={Boolean(productForm.status)} onChange={(event) => setProductForm((prev) => ({ ...prev, status: event.target.checked }))} />
@@ -815,8 +975,7 @@ export default function DashboardPage() {
                 className="btn secondary"
                 type="button"
                 onClick={() => {
-                  setProductForm(emptyProductForm());
-                  setShowProductForm(false);
+                  resetProductForm();
                 }}
               >
                 Hủy
@@ -828,9 +987,18 @@ export default function DashboardPage() {
         <div className="orders-list">
           {products.map((product) => (
             <article className="order-card" key={product.id}>
-              <div>
-                <h3>{product.name}</h3>
-                <p className="muted-text">SKU: {product.sku || 'Không có'} | Giá: {Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
+              <div className="admin-product-main">
+                <div className="admin-product-thumb-wrap">
+                  {Array.isArray(product.images) && product.images[0] ? (
+                    <img className="admin-product-thumb" src={resolveMediaUrl(product.images[0])} alt={product.name || 'Sản phẩm'} />
+                  ) : (
+                    <div className="admin-product-thumb admin-product-thumb-placeholder">Không ảnh</div>
+                  )}
+                </div>
+                <div>
+                  <h3>{product.name}</h3>
+                  <p className="muted-text">SKU: {product.sku || 'Không có'} | Giá: {Number(product.price || 0).toLocaleString('vi-VN')} VND</p>
+                </div>
               </div>
               <div className="hero-actions">
                 <button
@@ -844,10 +1012,11 @@ export default function DashboardPage() {
                       categoryId: product?.category?.id || product?.category?._id || product?.category || '',
                       sku: product.sku || '',
                       description: product.description || '',
-                      images: Array.isArray(product.images) ? product.images.join(', ') : '',
+                      images: Array.isArray(product.images) ? product.images : [],
                       weightInGram: product.weightInGram || '',
                       status: product.status !== false
                     });
+                    setProductImageFiles([]);
                     setShowProductForm(true);
                   }}
                 >
@@ -887,8 +1056,8 @@ export default function DashboardPage() {
               <option value="">Chọn sản phẩm</option>
               {products.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
             </select>
-            <input type="number" placeholder="Stock" value={inventoryForm.stock} onChange={(event) => setInventoryForm((prev) => ({ ...prev, stock: event.target.value }))} />
-            <input type="number" placeholder="Min stock threshold" value={inventoryForm.minStockThreshold} onChange={(event) => setInventoryForm((prev) => ({ ...prev, minStockThreshold: event.target.value }))} />
+            <input type="number" placeholder="Tồn kho" value={inventoryForm.stock} onChange={(event) => setInventoryForm((prev) => ({ ...prev, stock: event.target.value }))} />
+            <input type="number" placeholder="Ngưỡng tồn tối thiểu" value={inventoryForm.minStockThreshold} onChange={(event) => setInventoryForm((prev) => ({ ...prev, minStockThreshold: event.target.value }))} />
             <div className="hero-actions">
               <button className="btn primary" type="submit">Tạo bản ghi tồn kho</button>
               <button
@@ -908,17 +1077,46 @@ export default function DashboardPage() {
         <div className="orders-list">
           {inventories.map((inventory) => {
             const productId = inventory?.product?._id || inventory?.product?.id || inventory?.product;
+            const isLowStock = Number(inventory.availableStock || 0) <= Number(inventory.minStockThreshold || 0);
+            const isEditing = editingInventoryId === inventory.id;
             return (
               <article className="order-card" key={inventory.id}>
                 <div>
                   <h3>{inventory?.product?.name || 'Sản phẩm'}</h3>
-                  <p>Stock: <strong>{inventory.stock}</strong> | Reserved: <strong>{inventory.reservedStock}</strong></p>
-                  <p className="muted-text">Available: {inventory.availableStock} | Min: {inventory.minStockThreshold}</p>
+                  <p>Tồn kho: <strong>{inventory.stock}</strong> | Đã giữ: <strong>{inventory.reservedStock}</strong></p>
+                  <p className="muted-text">Khả dụng: {inventory.availableStock} | Tối thiểu: {inventory.minStockThreshold}</p>
+                  {isLowStock ? (
+                    <p>
+                      <span className="status-badge status-error">Sắp hết hàng</span>
+                    </p>
+                  ) : null}
+                  {isEditing ? (
+                    <form className="stack-gap" style={{ marginTop: '10px' }} onSubmit={submitAdjustInventory}>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Tồn kho mới"
+                        value={adjustInventoryForm.newStock}
+                        onChange={(event) => setAdjustInventoryForm((prev) => ({ ...prev, newStock: event.target.value }))}
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Ngưỡng tồn tối thiểu mới"
+                        value={adjustInventoryForm.minStockThreshold}
+                        onChange={(event) => setAdjustInventoryForm((prev) => ({ ...prev, minStockThreshold: event.target.value }))}
+                      />
+                      <div className="hero-actions">
+                        <button className="btn primary" type="submit" disabled={adjustStockMutation.isPending}>Lưu điều chỉnh</button>
+                        <button className="btn secondary" type="button" onClick={cancelAdjustInventory}>Hủy</button>
+                      </div>
+                    </form>
+                  ) : null}
                 </div>
                 <div className="hero-actions">
                   <button className="btn secondary" type="button" onClick={() => increaseStockMutation.mutate({ productId, quantity: 1 })}>+1</button>
                   <button className="btn secondary" type="button" onClick={() => decreaseStockMutation.mutate({ productId, quantity: 1 })}>-1</button>
-                  <button className="btn secondary" type="button" onClick={() => adjustStockMutation.mutate({ productId, newStock: inventory.stock, minStockThreshold: inventory.minStockThreshold })}>Adjust</button>
+                  <button className="btn secondary" type="button" onClick={() => startAdjustInventory(inventory)}>Điều chỉnh</button>
                   <button className="btn secondary" type="button" onClick={() => deleteInventoryMutation.mutate(productId)}>Xóa</button>
                 </div>
               </article>
@@ -932,51 +1130,55 @@ export default function DashboardPage() {
   function renderOrdersContent() {
     return (
       <section className="paper-block stack-gap">
-        <div className="section-head-row">
-          <h2>Cập nhật trạng thái đơn hàng</h2>
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={() => {
-              if (showOrderForm) {
-                setOrderStatusForm({ orderId: '', status: 'PENDING' });
-              }
-              setShowOrderForm((prev) => !prev);
-            }}
-          >
-            {showOrderForm ? 'Đóng form' : 'Cập nhật đơn hàng'}
-          </button>
+        <h2>Quản lý đơn hàng</h2>
+
+        <div className="orders-list">
+          {adminOrders.map((order) => {
+            const orderStatus = normalizeOrderStatus(order.status);
+            const paymentStatus = normalizePaymentStatus(order.paymentStatus);
+            const customerName = order?.user?.fullName || order?.user?.username || 'Khách hàng';
+
+            return (
+              <article className="order-card" key={order.id}>
+                <div>
+                  <h3>Đơn #{String(order.id).slice(-6).toUpperCase()}</h3>
+                  <p className="muted-text">Khách hàng: {customerName}</p>
+                  <p>Tổng tiền: <strong>{Number(order.totalPrice || 0).toLocaleString('vi-VN')} VND</strong></p>
+                  <p>
+                    Trạng thái đơn: <span className={`status-badge ${orderStatus.className}`}>{orderStatus.label}</span>
+                  </p>
+                  <p>
+                    Trạng thái thanh toán: <span className={`status-badge ${paymentStatus.className}`}>{paymentStatus.label}</span>
+                  </p>
+                </div>
+                <div className="payment-status-menu-wrap">
+                  <button
+                    type="button"
+                    className="mini-icon-btn"
+                    aria-label="Cập nhật trạng thái đơn hàng"
+                    onClick={() => setOpenOrderMenuId((current) => (current === order.id ? '' : order.id))}
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                  {openOrderMenuId === order.id ? (
+                    <div className="payment-status-popup">
+                      {['PENDING', 'SHIPPED', 'COMPLETED', 'CANCELLED'].map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          className="btn secondary payment-status-btn"
+                          onClick={() => updateOrderStatusMutation.mutate({ id: order.id, payload: { status } })}
+                        >
+                          {getOrderStatusLabel(status)}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
-        <p className="muted-text">Backend chưa có endpoint list-all orders cho admin. Bạn có thể chọn orderId từ payment hoặc nhập trực tiếp.</p>
-        {showOrderForm ? (
-          <form className="stack-gap" onSubmit={submitOrderStatus}>
-            <select value={orderStatusForm.orderId} onChange={(event) => setOrderStatusForm((prev) => ({ ...prev, orderId: event.target.value }))}>
-              <option value="">Chọn order từ payment</option>
-              {orderIdsFromPayments.map((id) => <option key={id} value={id}>{id}</option>)}
-            </select>
-            <input type="text" placeholder="Hoặc nhập Order ID" value={orderStatusForm.orderId} onChange={(event) => setOrderStatusForm((prev) => ({ ...prev, orderId: event.target.value }))} />
-            <select value={orderStatusForm.status} onChange={(event) => setOrderStatusForm((prev) => ({ ...prev, status: event.target.value }))}>
-              <option value="PENDING">PENDING</option>
-              <option value="PAID">PAID</option>
-              <option value="SHIPPED">SHIPPED</option>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
-            <div className="hero-actions">
-              <button className="btn primary" type="submit">Cập nhật trạng thái đơn</button>
-              <button
-                className="btn secondary"
-                type="button"
-                onClick={() => {
-                  setOrderStatusForm({ orderId: '', status: 'PENDING' });
-                  setShowOrderForm(false);
-                }}
-              >
-                Hủy
-              </button>
-            </div>
-          </form>
-        ) : null}
       </section>
     );
   }
@@ -989,22 +1191,34 @@ export default function DashboardPage() {
           {payments.map((payment) => (
             <article className="order-card" key={payment.id}>
               <div>
-                <h3>Payment #{String(payment.id).slice(-6).toUpperCase()}</h3>
-                <p className="muted-text">Order: {getOrderIdFromPayment(payment) || 'Không có'}</p>
-                <p>Amount: <strong>{Number(payment.amount || 0).toLocaleString('vi-VN')} VND</strong></p>
-                <p>Status: <strong>{payment.paymentStatus}</strong></p>
+                <h3>Thanh toán #{String(payment.id).slice(-6).toUpperCase()}</h3>
+                <p className="muted-text">Đơn hàng: {getOrderIdFromPayment(payment) || 'Không có'}</p>
+                <p>Số tiền: <strong>{Number(payment.amount || 0).toLocaleString('vi-VN')} VND</strong></p>
+                <p>Trạng thái: <strong>{getPaymentStatusLabel(payment.paymentStatus)}</strong></p>
               </div>
-              <div className="hero-actions">
-                {['PENDING', 'PAID', 'FAILED', 'REFUNDED', 'CANCELLED'].map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    className="btn secondary"
-                    onClick={() => updatePaymentStatusMutation.mutate({ id: payment.id, payload: { paymentStatus: status } })}
-                  >
-                    {status}
-                  </button>
-                ))}
+              <div className="payment-status-menu-wrap">
+                <button
+                  type="button"
+                  className="mini-icon-btn"
+                  aria-label="Cập nhật trạng thái thanh toán"
+                  onClick={() => setOpenPaymentMenuId((current) => (current === payment.id ? '' : payment.id))}
+                >
+                  <MoreVertical size={16} />
+                </button>
+                {openPaymentMenuId === payment.id ? (
+                  <div className="payment-status-popup">
+                    {['PENDING', 'PAID', 'CANCELLED'].map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        className="btn secondary payment-status-btn"
+                        onClick={() => updatePaymentStatusMutation.mutate({ id: payment.id, payload: { paymentStatus: status } })}
+                      >
+                        {getPaymentStatusLabel(status)}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}
@@ -1018,7 +1232,7 @@ export default function DashboardPage() {
       <section className="stack-gap">
         <div className="paper-block stack-gap">
           <div className="section-head-row">
-            <h2>Quản lý role</h2>
+            <h2>Quản lý vai trò</h2>
             <button
               className="btn secondary"
               type="button"
@@ -1029,16 +1243,16 @@ export default function DashboardPage() {
                 setShowRoleForm((prev) => !prev);
               }}
             >
-              {showRoleForm ? 'Đóng form' : 'Thêm role'}
+              {showRoleForm ? 'Đóng form' : 'Thêm vai trò'}
             </button>
           </div>
 
           {showRoleForm ? (
             <form className="stack-gap" onSubmit={submitRole}>
-              <input type="text" placeholder="Tên role" value={roleForm.name} onChange={(event) => setRoleForm((prev) => ({ ...prev, name: event.target.value }))} />
-              <textarea rows={3} placeholder="Mô tả role" value={roleForm.description} onChange={(event) => setRoleForm((prev) => ({ ...prev, description: event.target.value }))} />
+              <input type="text" placeholder="Tên vai trò" value={roleForm.name} onChange={(event) => setRoleForm((prev) => ({ ...prev, name: event.target.value }))} />
+              <textarea rows={3} placeholder="Mô tả vai trò" value={roleForm.description} onChange={(event) => setRoleForm((prev) => ({ ...prev, description: event.target.value }))} />
               <div className="hero-actions">
-                <button className="btn primary" type="submit">{roleForm.id ? 'Cập nhật role' : 'Tạo role'}</button>
+                <button className="btn primary" type="submit">{roleForm.id ? 'Cập nhật vai trò' : 'Tạo vai trò'}</button>
                 <button className="btn secondary" type="button" onClick={() => { setRoleForm(emptyRoleForm()); setShowRoleForm(false); }}>Hủy</button>
               </div>
             </form>
@@ -1075,8 +1289,8 @@ export default function DashboardPage() {
 
         <section className="paper-block stack-gap">
           <div className="section-head-row">
-            <h2>Gán role cho user</h2>
-            <span className="muted-text">Chỉ admin mới đổi role được</span>
+            <h2>Gán vai trò cho người dùng</h2>
+            <span className="muted-text">Chỉ quản trị viên mới đổi vai trò được</span>
           </div>
 
           <div className="admin-access-grid">
@@ -1085,11 +1299,11 @@ export default function DashboardPage() {
                 <div>
                   <h3>{user.fullName || user.username}</h3>
                   <p className="muted-text">{user.email}</p>
-                  <p>Role hiện tại: <strong>{resolveRoleName(user.role) || 'Chưa có'}</strong></p>
+                  <p>Vai trò hiện tại: <strong>{resolveRoleName(user.role) || 'Chưa có'}</strong></p>
                 </div>
                 <div className="stack-gap">
                   <select value={resolveUserRoleId(user)} onChange={(event) => updateUserRoleMutation.mutate({ id: user.id, payload: { roleId: event.target.value } })}>
-                    <option value="">Chọn role</option>
+                    <option value="">Chọn vai trò</option>
                     {roles.map((role) => (
                       <option key={role.id} value={role.id}>{role.name}</option>
                     ))}
@@ -1111,19 +1325,19 @@ export default function DashboardPage() {
       <section className="stack-gap">
         <section className="paper-block stack-gap">
           <div className="section-head-row">
-            <h2>Queue hỗ trợ khách hàng</h2>
+            <h2>Hàng chờ hỗ trợ khách hàng</h2>
             <div className="hero-actions" style={{ marginTop: 0 }}>
               <select value={supportFilter.assigned} onChange={(event) => setSupportFilter((prev) => ({ ...prev, assigned: event.target.value }))}>
-                <option value="mine">Ticket của tôi</option>
-                <option value="false">Chưa assign</option>
-                <option value="true">Đã assign</option>
+                <option value="mine">Yêu cầu của tôi</option>
+                <option value="false">Chưa được nhận</option>
+                <option value="true">Đã được nhận</option>
               </select>
               <select value={supportFilter.status} onChange={(event) => setSupportFilter((prev) => ({ ...prev, status: event.target.value }))}>
                 <option value="">Tất cả trạng thái</option>
-                <option value="open">open</option>
-                <option value="pending">pending</option>
-                <option value="resolved">resolved</option>
-                <option value="closed">closed</option>
+                <option value="open">Mới mở</option>
+                <option value="pending">Đang xử lý</option>
+                <option value="resolved">Đã xử lý</option>
+                <option value="closed">Đã đóng</option>
               </select>
             </div>
           </div>
@@ -1131,12 +1345,12 @@ export default function DashboardPage() {
           <div className="admin-access-grid">
             <div className="orders-list">
               {supportConversationsQuery.isLoading ? (
-                <DataStatePanel type="loading" title="Đang tải queue" message="Hệ thống đang lấy danh sách ticket hỗ trợ." />
+                <DataStatePanel type="loading" title="Đang tải hàng chờ" message="Hệ thống đang lấy danh sách yêu cầu hỗ trợ." />
               ) : null}
               {!supportConversationsQuery.isLoading && supportConversationsResult && !supportConversationsResult.ok ? (
                 <DataStatePanel
                   type="error"
-                  title="Không tải được queue hỗ trợ"
+                  title="Không tải được hàng chờ hỗ trợ"
                   message={supportConversationsResult.message}
                   onRetry={() => supportConversationsQuery.refetch()}
                 />
@@ -1144,8 +1358,8 @@ export default function DashboardPage() {
               {!supportConversationsQuery.isLoading && supportConversationsResult?.ok && supportConversations.length === 0 ? (
                 <DataStatePanel
                   type="empty"
-                  title="Không có ticket phù hợp"
-                  message="Thử đổi bộ lọc trạng thái hoặc phạm vi assign để tìm ticket khác."
+                  title="Không có yêu cầu phù hợp"
+                  message="Thử đổi bộ lọc trạng thái hoặc phạm vi phụ trách để tìm yêu cầu khác."
                   onRetry={() => supportConversationsQuery.refetch()}
                 />
               ) : null}
@@ -1162,7 +1376,7 @@ export default function DashboardPage() {
                     onClick={() => setSelectedSupportConversationId(conversationId)}
                   >
                     <strong>{conversation.subject}</strong>
-                    <span>{customerName} · {conversation.status} · {conversation.priority}</span>
+                    <span>{customerName} · {getSupportStatusLabel(conversation.status)} · {getPriorityLabel(conversation.priority)}</span>
                     <small>{conversation.lastMessageAt ? new Date(conversation.lastMessageAt).toLocaleString('vi-VN') : '-'}</small>
                     {conversation.unreadCountForAdmin ? <em>{conversation.unreadCountForAdmin} tin chưa đọc</em> : null}
                   </button>
@@ -1176,12 +1390,12 @@ export default function DashboardPage() {
               {activeSupportConversationId ? (
                 <>
                   <div className="hero-actions" style={{ marginTop: 0 }}>
-                    <button className="btn secondary" type="button" onClick={() => assignSupportMutation.mutate(activeSupportConversationId)}>Nhận ticket</button>
+                    <button className="btn secondary" type="button" onClick={() => assignSupportMutation.mutate(activeSupportConversationId)}>Nhận yêu cầu</button>
                     <button className="btn secondary" type="button" onClick={() => markSupportReadMutation.mutate(activeSupportConversationId)}>Đánh dấu đã đọc</button>
                     <select value={supportStatus} onChange={(event) => setSupportStatus(event.target.value)}>
-                      <option value="pending">pending</option>
-                      <option value="resolved">resolved</option>
-                      <option value="closed">closed</option>
+                      <option value="pending">Đang xử lý</option>
+                      <option value="resolved">Đã xử lý</option>
+                      <option value="closed">Đã đóng</option>
                     </select>
                     <button
                       className="btn secondary"
@@ -1262,17 +1476,17 @@ export default function DashboardPage() {
     return (
       <section className="paper-block stack-gap">
         <div className="section-head-row">
-          <h2>Review moderation</h2>
-          <span className="muted-text">Xem và xóa các review không phù hợp</span>
+          <h2>Kiểm duyệt đánh giá</h2>
+          <span className="muted-text">Xem và xóa các đánh giá không phù hợp</span>
         </div>
 
         {adminReviewsQuery.isLoading ? (
-          <DataStatePanel type="loading" title="Đang tải reviews" message="Danh sách review đang được cập nhật." />
+          <DataStatePanel type="loading" title="Đang tải đánh giá" message="Danh sách đánh giá đang được cập nhật." />
         ) : null}
         {!adminReviewsQuery.isLoading && adminReviewsResult && !adminReviewsResult.ok ? (
           <DataStatePanel
             type="error"
-            title="Không tải được review"
+            title="Không tải được đánh giá"
             message={adminReviewsResult.message}
             onRetry={() => adminReviewsQuery.refetch()}
           />
@@ -1280,8 +1494,8 @@ export default function DashboardPage() {
         {!adminReviewsQuery.isLoading && adminReviewsResult?.ok && adminReviews.length === 0 ? (
           <DataStatePanel
             type="empty"
-            title="Chưa có review nào"
-            message="Hiện chưa có review cần moderation."
+            title="Chưa có đánh giá nào"
+            message="Hiện chưa có đánh giá cần kiểm duyệt."
             onRetry={() => adminReviewsQuery.refetch()}
           />
         ) : null}
@@ -1299,7 +1513,7 @@ export default function DashboardPage() {
                   <p>{review.comment || 'Không có nội dung'}</p>
                 </div>
                 <div className="hero-actions">
-                  <button className="btn secondary" type="button" onClick={() => deleteReviewModerationMutation.mutate(reviewId)}>Xóa review</button>
+                  <button className="btn secondary" type="button" onClick={() => deleteReviewModerationMutation.mutate(reviewId)}>Xóa đánh giá</button>
                 </div>
               </article>
             );

@@ -19,6 +19,15 @@ export async function getMyOrdersApi(params = {}) {
   }
 }
 
+export async function getAllOrdersAdminApi(params = {}) {
+  try {
+    const response = await httpClient.get('/orders/admin/all', { params });
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
+
 export async function getOrderDetailApi(id) {
   try {
     const response = await httpClient.get(`/orders/${id}`);

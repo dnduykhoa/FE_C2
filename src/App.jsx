@@ -7,15 +7,15 @@ function App() {
   return (
     <>
       <div>
-        <h1>FE_C2 - React Project</h1>
-        <p>Welcome to your React application</p>
+        <h1>FE_C2 - Dự án React</h1>
+        <p>Chào mừng bạn đến với ứng dụng React</p>
       </div>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+          Số đếm hiện tại: {count}
         </button>
         <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+          Chỉnh sửa <code>src/App.jsx</code> và lưu để kiểm tra HMR
         </p>
       </div>
     </>

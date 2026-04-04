@@ -50,7 +50,8 @@ const errorCodeMessageMap = {
   INVALID_STATE: 'Trạng thái hiện tại không cho phép thao tác.',
   ASSIGN_CONFLICT: 'Ticket đã được admin khác nhận xử lý.',
   CURRENT_PASSWORD_REQUIRED: 'Vui lòng nhập mật khẩu hiện tại.',
-  INVALID_CURRENT_PASSWORD: 'Mật khẩu hiện tại không đúng.'
+  INVALID_CURRENT_PASSWORD: 'Mật khẩu hiện tại không đúng.',
+  REVIEW_NOT_ELIGIBLE: 'Chỉ được đánh giá sản phẩm thuộc đơn đã thanh toán.'
 };
 
 export function normalizeError(error) {

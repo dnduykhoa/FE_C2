@@ -17,8 +17,27 @@ const defaultTicketForm = {
   content: ''
 };
 
+function getSupportStatusLabel(status) {
+  const value = String(status || '').toLowerCase();
+  if (value === 'open') return 'Mới mở';
+  if (value === 'pending') return 'Đang xử lý';
+  if (value === 'resolved') return 'Đã xử lý';
+  if (value === 'closed') return 'Đã đóng';
+  return status || 'Không xác định';
+}
+
+function getPriorityLabel(priority) {
+  const value = String(priority || '').toLowerCase();
+  if (value === 'low') return 'Thấp';
+  if (value === 'normal') return 'Bình thường';
+  if (value === 'high') return 'Cao';
+  if (value === 'urgent') return 'Khẩn cấp';
+  return priority || 'Không xác định';
+}
+
 export default function SupportChatPage() {
   const queryClient = useQueryClient();
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState('');
   const [ticketForm, setTicketForm] = useState(defaultTicketForm);
   const [messageContent, setMessageContent] = useState('');
@@ -48,11 +67,12 @@ export default function SupportChatPage() {
     mutationFn: createConversationApi,
     onSuccess: (result) => {
       if (!result.ok) {
-        toast.error(result.message || 'Không thể tạo ticket hỗ trợ');
+        toast.error(result.message || 'Không thể tạo yêu cầu hỗ trợ');
         return;
       }
-      toast.success('Đã tạo ticket hỗ trợ');
+      toast.success('Đã tạo yêu cầu hỗ trợ');
       setTicketForm(defaultTicketForm);
+      setShowCreateForm(false);
       queryClient.invalidateQueries({ queryKey: ['support', 'my-conversations'] });
     }
   });
@@ -86,7 +106,7 @@ export default function SupportChatPage() {
   function handleCreateTicket(event) {
     event.preventDefault();
     if (!ticketForm.subject.trim() || !ticketForm.content.trim()) {
-      toast.error('Vui lòng nhập chủ đề và nội dung ticket');
+      toast.error('Vui lòng nhập chủ đề và nội dung yêu cầu');
       return;
     }
 
@@ -119,37 +139,60 @@ export default function SupportChatPage() {
 
   return (
     <section className="stack-gap">
-      <section className="paper-block stack-gap">
-        <h1>Tạo ticket hỗ trợ</h1>
-        <form className="stack-gap" onSubmit={handleCreateTicket}>
-          <input
-            type="text"
-            placeholder="Chủ đề hỗ trợ"
-            value={ticketForm.subject}
-            onChange={(event) => setTicketForm((prev) => ({ ...prev, subject: event.target.value }))}
-          />
-          <select value={ticketForm.priority} onChange={(event) => setTicketForm((prev) => ({ ...prev, priority: event.target.value }))}>
-            <option value="low">Ưu tiên thấp</option>
-            <option value="normal">Ưu tiên bình thường</option>
-            <option value="high">Ưu tiên cao</option>
-            <option value="urgent">Khẩn cấp</option>
-          </select>
-          <textarea
-            rows={4}
-            placeholder="Nội dung vấn đề cần hỗ trợ"
-            value={ticketForm.content}
-            onChange={(event) => setTicketForm((prev) => ({ ...prev, content: event.target.value }))}
-          />
-          <div className="hero-actions">
-            <button className="btn primary" type="submit" disabled={createConversationMutation.isPending}>
-              Tạo ticket
-            </button>
-          </div>
-        </form>
-      </section>
+      {showCreateForm ? (
+        <section className="paper-block stack-gap">
+          <h1>Tạo yêu cầu hỗ trợ</h1>
+          <form className="stack-gap" onSubmit={handleCreateTicket}>
+            <input
+              type="text"
+              placeholder="Chủ đề hỗ trợ"
+              value={ticketForm.subject}
+              onChange={(event) => setTicketForm((prev) => ({ ...prev, subject: event.target.value }))}
+            />
+            <select value={ticketForm.priority} onChange={(event) => setTicketForm((prev) => ({ ...prev, priority: event.target.value }))}>
+              <option value="low">Ưu tiên thấp</option>
+              <option value="normal">Ưu tiên bình thường</option>
+              <option value="high">Ưu tiên cao</option>
+              <option value="urgent">Khẩn cấp</option>
+            </select>
+            <textarea
+              rows={4}
+              placeholder="Nội dung vấn đề cần hỗ trợ"
+              value={ticketForm.content}
+              onChange={(event) => setTicketForm((prev) => ({ ...prev, content: event.target.value }))}
+            />
+            <div className="hero-actions">
+              <button className="btn primary" type="submit" disabled={createConversationMutation.isPending}>
+                Tạo yêu cầu
+              </button>
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={() => {
+                  setTicketForm(defaultTicketForm);
+                  setShowCreateForm(false);
+                }}
+              >
+                Đóng form
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       <section className="paper-block stack-gap">
-        <h2>Hội thoại hỗ trợ của tôi</h2>
+        <div className="section-head-row">
+          <h2>Hội thoại hỗ trợ của tôi</h2>
+          {!showCreateForm ? (
+            <button
+              className="btn primary"
+              type="button"
+              onClick={() => setShowCreateForm(true)}
+            >
+              Tạo yêu cầu
+            </button>
+          ) : null}
+        </div>
         <div className="admin-access-grid">
           <div className="orders-list">
             {conversationsQuery.isLoading ? (
@@ -166,8 +209,8 @@ export default function SupportChatPage() {
             {!conversationsQuery.isLoading && conversationsResult?.ok && conversations.length === 0 ? (
               <DataStatePanel
                 type="empty"
-                title="Chưa có ticket hỗ trợ"
-                message="Bạn có thể tạo ticket mới ở biểu mẫu phía trên."
+                title="Chưa có yêu cầu hỗ trợ"
+                message="Bấm nút Tạo yêu cầu để bắt đầu hội thoại mới."
                 onRetry={() => conversationsQuery.refetch()}
               />
             ) : null}
@@ -185,7 +228,7 @@ export default function SupportChatPage() {
                   }}
                 >
                   <strong>{conversation.subject}</strong>
-                  <span>{conversation.status} · {conversation.priority}</span>
+                  <span>{getSupportStatusLabel(conversation.status)} · {getPriorityLabel(conversation.priority)}</span>
                   <small>{dayjs(conversation.lastMessageAt).format('DD/MM/YYYY HH:mm')}</small>
                   {conversation.unreadCountForCustomer ? <em>{conversation.unreadCountForCustomer} tin chưa đọc</em> : null}
                 </button>

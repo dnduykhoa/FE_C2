@@ -17,6 +17,9 @@ export default function PaymentDetailPage() {
   }
 
   const payment = paymentQuery.data?.data;
+  const relatedOrderId = typeof payment?.order === 'object'
+    ? (payment.order?.id || payment.order?._id || '')
+    : (payment?.order || '');
   if (!payment) {
     return (
       <section className="paper-block stack-gap">
@@ -27,9 +30,9 @@ export default function PaymentDetailPage() {
   }
 
   return (
-    <section className="paper-block stack-gap">
+    <section className="paper-block stack-gap payment-detail-section">
       <h1>Chi tiết thanh toán</h1>
-      <div className="profile-grid">
+      <div className="profile-grid payment-detail-grid">
         <div>
           <label>Mã thanh toán</label>
           <p>{payment.id}</p>
@@ -55,9 +58,9 @@ export default function PaymentDetailPage() {
           <p>{payment.paidAt ? dayjs(payment.paidAt).format('DD/MM/YYYY HH:mm') : 'Chưa thanh toán'}</p>
         </div>
       </div>
-      <p>Ghi chú: {payment.note || 'Không có'}</p>
-      <p>Mã đơn liên quan: {payment.order || 'Không có'}</p>
-      <Link className="btn secondary" to="/user/payments">Quay lại</Link>
+      <p className="payment-detail-meta"><strong>Ghi chú:</strong> {payment.note || 'Không có'}</p>
+      <p className="payment-detail-meta"><strong>Mã đơn liên quan:</strong> {relatedOrderId || 'Không có'}</p>
+      <Link className="btn secondary payment-back-btn" to="/user/payments">Quay lại</Link>
     </section>
   );
 }

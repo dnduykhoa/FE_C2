@@ -65,20 +65,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    const orderItems = items
-      .map((item) => ({
-        productId: item?.product?._id || item?.product?.id || item?.product,
-        quantity: Number(item?.quantity || 0)
-      }))
-      .filter((item) => item.productId && item.quantity > 0);
-
-    if (orderItems.length === 0) {
-      toast.error('Giỏ hàng không hợp lệ, vui lòng thêm lại sản phẩm.');
-      return;
-    }
-
     createOrderMutation.mutate({
-      items: orderItems,
       shippingAddress: shippingAddress.trim(),
       note: note.trim()
     });

@@ -2,9 +2,8 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const configuredBaseURL = import.meta.env.VITE_API_BASE_URL || '';
-const devProxyPattern = /localhost:3000|127\.0\.0\.1:3000/;
-const baseURL = import.meta.env.DEV && devProxyPattern.test(configuredBaseURL)
-  ? ''
+const baseURL = import.meta.env.DEV
+  ? '/api'
   : configuredBaseURL;
 
 const httpClient = axios.create({

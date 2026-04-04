@@ -33,20 +33,26 @@ const router = createBrowserRouter([
       { path: 'auth/login', element: <LoginPage /> },
       { path: 'auth/register', element: <RegisterPage /> },
       { path: 'auth/forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'auth/reset-password', element: <ResetPasswordPage /> },
       {
         element: <RequireAuth />,
         children: [
           { path: 'user/profile', element: <ProfilePage /> },
-          { path: 'user/cart', element: <CartPage /> },
-          { path: 'user/checkout', element: <CheckoutPage /> },
-          { path: 'user/orders', element: <OrdersPage /> },
-          { path: 'user/orders/:id', element: <OrderDetailPage /> },
-          { path: 'user/payments', element: <PaymentsPage /> },
-          { path: 'user/payments/:id', element: <PaymentDetailPage /> },
-          { path: 'user/reservations', element: <ReservationsPage /> },
-          { path: 'user/reviews', element: <MyReviewsPage /> },
-          { path: 'user/support', element: <SupportChatPage /> },
+          {
+            element: <RequireRole roles={['USER']} />,
+            children: [
+              { path: 'user/cart', element: <CartPage /> },
+              { path: 'user/checkout', element: <CheckoutPage /> },
+              { path: 'user/orders', element: <OrdersPage /> },
+              { path: 'user/orders/:id', element: <OrderDetailPage /> },
+              { path: 'user/payments', element: <PaymentsPage /> },
+              { path: 'user/payments/:id', element: <PaymentDetailPage /> },
+              { path: 'user/reservations', element: <ReservationsPage /> },
+              { path: 'user/reviews', element: <MyReviewsPage /> },
+              { path: 'user/support', element: <SupportChatPage /> }
+            ]
+          },
           {
             element: <RequireRole roles={['ADMIN', 'MODERATOR']} />,
             children: [{ path: 'admin', element: <DashboardPage /> }]

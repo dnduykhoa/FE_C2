@@ -14,6 +14,7 @@ export default function MainLayout() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const roleName = getRoleName(user);
   const canAccessAdmin = ['ADMIN', 'MODERATOR'].includes(roleName);
+  const isEndUser = roleName === 'USER';
   const isAdminRoute = location.pathname.startsWith('/admin');
   const displayName = user?.fullName || user?.username || 'Tài khoản';
 
@@ -57,15 +58,17 @@ export default function MainLayout() {
               <ul className="nav-list">
                 <li><NavLink to="/">Trang chủ</NavLink></li>
                 <li><NavLink to="/products">Sản phẩm</NavLink></li>
-                <li>
-                  <NavLink to="/user/cart" className="cart-icon-link" aria-label="Giỏ hàng">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="9" cy="20" r="1.4" />
-                      <circle cx="18" cy="20" r="1.4" />
-                      <path d="M3 4h2l2.3 10h10.8l1.8-7H7" />
-                    </svg>
-                  </NavLink>
-                </li>
+                {token && isEndUser ? (
+                  <li>
+                    <NavLink to="/user/cart" className="cart-icon-link" aria-label="Giỏ hàng">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="9" cy="20" r="1.4" />
+                        <circle cx="18" cy="20" r="1.4" />
+                        <path d="M3 4h2l2.3 10h10.8l1.8-7H7" />
+                      </svg>
+                    </NavLink>
+                  </li>
+                ) : null}
               </ul>
             </nav>
             <div className="header-actions">
@@ -91,12 +94,12 @@ export default function MainLayout() {
 
                   {isProfileMenuOpen ? (
                     <div className="profile-dropdown">
-                      {canAccessAdmin ? <NavLink to="/admin" onClick={() => setIsProfileMenuOpen(false)}>Dashboard</NavLink> : null}
-                      <NavLink to="/user/orders" onClick={() => setIsProfileMenuOpen(false)}>Đơn hàng</NavLink>
-                      <NavLink to="/user/payments" onClick={() => setIsProfileMenuOpen(false)}>Thanh toán</NavLink>
-                      <NavLink to="/user/reservations" onClick={() => setIsProfileMenuOpen(false)}>Reservation</NavLink>
-                      <NavLink to="/user/support" onClick={() => setIsProfileMenuOpen(false)}>Hỗ trợ</NavLink>
-                      <NavLink to="/user/reviews" onClick={() => setIsProfileMenuOpen(false)}>Review của tôi</NavLink>
+                      {canAccessAdmin ? <NavLink to="/admin" onClick={() => setIsProfileMenuOpen(false)}>Bảng quản trị</NavLink> : null}
+                      {isEndUser ? <NavLink to="/user/orders" onClick={() => setIsProfileMenuOpen(false)}>Đơn hàng</NavLink> : null}
+                      {isEndUser ? <NavLink to="/user/payments" onClick={() => setIsProfileMenuOpen(false)}>Thanh toán</NavLink> : null}
+                      {isEndUser ? <NavLink to="/user/reservations" onClick={() => setIsProfileMenuOpen(false)}>Giữ chỗ</NavLink> : null}
+                      {isEndUser ? <NavLink to="/user/support" onClick={() => setIsProfileMenuOpen(false)}>Hỗ trợ</NavLink> : null}
+                      {isEndUser ? <NavLink to="/user/reviews" onClick={() => setIsProfileMenuOpen(false)}>Đánh giá của tôi</NavLink> : null}
                       <NavLink to="/user/profile" onClick={() => setIsProfileMenuOpen(false)}>Tài khoản</NavLink>
                       <button className="dropdown-logout" type="button" onClick={handleLogout}>Đăng xuất</button>
                     </div>
