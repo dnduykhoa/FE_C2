@@ -54,3 +54,38 @@ export async function getMeApi() {
     return normalizeError(error);
   }
 }
+
+export async function updateMyProfileApi(payload) {
+  try {
+    const response = await httpClient.patch('/auth/me', payload);
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
+
+export async function changeMyPasswordApi(payload) {
+  try {
+    const response = await httpClient.put('/auth/me/password', payload);
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
+
+export async function uploadMyAvatarApi(file) {
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const response = await httpClient.post('/auth/me/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    return normalizeSuccess(response.data);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}

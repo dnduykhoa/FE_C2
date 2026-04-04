@@ -48,7 +48,9 @@ const errorCodeMessageMap = {
   NOT_FOUND: 'Không tìm thấy dữ liệu.',
   FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này.',
   INVALID_STATE: 'Trạng thái hiện tại không cho phép thao tác.',
-  ASSIGN_CONFLICT: 'Ticket đã được admin khác nhận xử lý.'
+  ASSIGN_CONFLICT: 'Ticket đã được admin khác nhận xử lý.',
+  CURRENT_PASSWORD_REQUIRED: 'Vui lòng nhập mật khẩu hiện tại.',
+  INVALID_CURRENT_PASSWORD: 'Mật khẩu hiện tại không đúng.'
 };
 
 export function normalizeError(error) {

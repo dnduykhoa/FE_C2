@@ -649,6 +649,22 @@ textarea:focus {
   gap: 12px;
 }
 
+.profile-avatar-panel {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #F8F2E9;
+}
+
 .stack-gap {
   display: grid;
   gap: 14px;
