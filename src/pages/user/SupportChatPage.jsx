@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createConversationApi,
@@ -17,15 +17,24 @@ const defaultTicketForm = {
   content: ''
 };
 
+function isDocumentVisible() {
+  if (typeof document === 'undefined') {
+    return true;
+  }
+  return document.visibilityState === 'visible';
+}
+
 export default function SupportChatPage() {
   const queryClient = useQueryClient();
   const [selectedConversationId, setSelectedConversationId] = useState('');
   const [ticketForm, setTicketForm] = useState(defaultTicketForm);
   const [messageContent, setMessageContent] = useState('');
+  const [expandedMessages, setExpandedMessages] = useState({});
 
   const conversationsQuery = useQuery({
     queryKey: ['support', 'my-conversations'],
-    queryFn: () => getMyConversationsApi({ page: 1, limit: 30 })
+    queryFn: () => getMyConversationsApi({ page: 1, limit: 30 }),
+    refetchInterval: () => (isDocumentVisible() ? 15000 : false)
   });
 
   const conversationsResult = conversationsQuery.data;
@@ -41,7 +50,8 @@ export default function SupportChatPage() {
   const messagesQuery = useQuery({
     queryKey: ['support', 'messages', activeConversationId],
     queryFn: () => getConversationMessagesApi(activeConversationId, { page: 1, limit: 100 }),
-    enabled: Boolean(activeConversationId)
+    enabled: Boolean(activeConversationId),
+    refetchInterval: () => (activeConversationId && isDocumentVisible() ? 5000 : false)
   });
 
   const createConversationMutation = useMutation({
@@ -83,17 +93,35 @@ export default function SupportChatPage() {
     }
   });
 
+  useEffect(() => {
+    if (!activeConversationId) {
+      return;
+    }
+
+    markReadMutation.mutate(activeConversationId);
+  }, [activeConversationId]);
+
   function handleCreateTicket(event) {
     event.preventDefault();
-    if (!ticketForm.subject.trim() || !ticketForm.content.trim()) {
+    const normalizedSubject = ticketForm.subject.trim();
+    const normalizedContent = ticketForm.content.trim();
+    if (!normalizedSubject || !normalizedContent) {
       toast.error('Vui lòng nhập chủ đề và nội dung ticket');
+      return;
+    }
+    if (normalizedSubject.length > 200) {
+      toast.error('Chủ đề hỗ trợ tối đa 200 ký tự');
+      return;
+    }
+    if (normalizedContent.length > 2000) {
+      toast.error('Nội dung hỗ trợ tối đa 2000 ký tự');
       return;
     }
 
     createConversationMutation.mutate({
-      subject: ticketForm.subject.trim(),
+      subject: normalizedSubject,
       priority: ticketForm.priority,
-      content: ticketForm.content.trim()
+      content: normalizedContent
     });
   }
 
@@ -116,6 +144,26 @@ export default function SupportChatPage() {
 
   const messagesResult = messagesQuery.data;
   const messages = messagesResult?.ok ? (messagesResult?.data?.items || []) : [];
+  const sortedMessages = useMemo(
+    () => [...messages].sort((a, b) => new Date(a?.createdAt || 0).getTime() - new Date(b?.createdAt || 0).getTime()),
+    [messages]
+  );
+  const activeConversation = useMemo(
+    () => conversations.find((conversation) => (conversation._id || conversation.id) === activeConversationId) || null,
+    [conversations, activeConversationId]
+  );
+  const isConversationClosed = activeConversation?.status === 'closed';
+
+  function isLongMessage(content) {
+    return String(content || '').length > 160;
+  }
+
+  function toggleExpandedMessage(messageId) {
+    setExpandedMessages((prev) => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  }
 
   return (
     <section className="stack-gap">
@@ -148,10 +196,10 @@ export default function SupportChatPage() {
         </form>
       </section>
 
-      <section className="paper-block stack-gap">
+      <section className="paper-block stack-gap support-chat-shell">
         <h2>Hội thoại hỗ trợ của tôi</h2>
-        <div className="admin-access-grid">
-          <div className="orders-list">
+        <div className="admin-access-grid support-chat-layout">
+          <div className="orders-list support-conversation-list">
             {conversationsQuery.isLoading ? (
               <DataStatePanel type="loading" title="Đang tải hội thoại" message="Hệ thống đang lấy danh sách ticket của bạn." />
             ) : null}
@@ -174,6 +222,9 @@ export default function SupportChatPage() {
             {conversations.map((conversation) => {
               const conversationId = conversation._id || conversation.id;
               const isActive = conversationId === activeConversationId;
+              const formattedLastMessageAt = conversation.lastMessageAt
+                ? dayjs(conversation.lastMessageAt).format('DD/MM/YYYY HH:mm')
+                : '-';
               return (
                 <button
                   key={conversationId}
@@ -184,17 +235,30 @@ export default function SupportChatPage() {
                     markReadMutation.mutate(conversationId);
                   }}
                 >
-                  <strong>{conversation.subject}</strong>
-                  <span>{conversation.status} · {conversation.priority}</span>
-                  <small>{dayjs(conversation.lastMessageAt).format('DD/MM/YYYY HH:mm')}</small>
-                  {conversation.unreadCountForCustomer ? <em>{conversation.unreadCountForCustomer} tin chưa đọc</em> : null}
+                  <div className="support-conversation-row">
+                    <strong className="support-conversation-title">{conversation.subject}</strong>
+                    <small className="support-conversation-time">{formattedLastMessageAt}</small>
+                  </div>
+                  <div className="support-conversation-row support-conversation-meta">
+                    <span className="support-meta-pill">{conversation.status}</span>
+                    <span className="support-meta-pill">{conversation.priority}</span>
+                    {conversation.unreadCountForCustomer ? <em className="support-unread-badge">{conversation.unreadCountForCustomer}</em> : null}
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          <div className="paper-block stack-gap" style={{ marginBottom: 0 }}>
-            <h3>Chi tiết hội thoại</h3>
+          <div className="paper-block stack-gap support-chat-panel" style={{ marginBottom: 0 }}>
+            <div className="support-chat-header">
+              <h3>Chi tiết hội thoại</h3>
+              {activeConversation ? (
+                <div className="support-chat-meta-row">
+                  <span className="status-badge status-pending">{activeConversation.status}</span>
+                  <span className="status-badge status-success">{activeConversation.priority}</span>
+                </div>
+              ) : null}
+            </div>
             {!activeConversationId ? <p>Hãy chọn hoặc tạo một hội thoại hỗ trợ.</p> : null}
             {activeConversationId ? (
               <>
@@ -218,12 +282,24 @@ export default function SupportChatPage() {
                       onRetry={() => messagesQuery.refetch()}
                     />
                   ) : null}
-                  {messages.map((message) => {
+                  {sortedMessages.map((message) => {
                     const messageId = message._id || message.id;
                     const isMine = message.senderRole === 'customer';
+                    const shouldCollapse = isLongMessage(message.content);
+                    const isExpanded = Boolean(expandedMessages[messageId]);
                     return (
                       <article key={messageId} className={`support-message-item ${isMine ? 'mine' : 'admin'}`}>
-                        <p>{message.content}</p>
+                        <span className="support-message-role">{isMine ? 'Bạn' : 'Hỗ trợ viên'}</span>
+                        <p className={shouldCollapse && !isExpanded ? 'support-message-clamped' : ''}>{message.content}</p>
+                        {shouldCollapse ? (
+                          <button
+                            type="button"
+                            className="support-toggle-btn"
+                            onClick={() => toggleExpandedMessage(messageId)}
+                          >
+                            {isExpanded ? 'Thu gọn' : 'Xem thêm'}
+                          </button>
+                        ) : null}
                         <small>{dayjs(message.createdAt).format('DD/MM/YYYY HH:mm')}</small>
                       </article>
                     );
@@ -235,15 +311,17 @@ export default function SupportChatPage() {
                     placeholder="Nhập tin nhắn của bạn"
                     value={messageContent}
                     onChange={(event) => setMessageContent(event.target.value)}
+                    disabled={isConversationClosed}
                   />
                   <div className="hero-actions">
-                    <button className="btn primary" type="submit" disabled={sendMessageMutation.isPending}>
+                    <button className="btn primary" type="submit" disabled={sendMessageMutation.isPending || isConversationClosed}>
                       Gửi tin nhắn
                     </button>
                     <button className="btn secondary" type="button" onClick={() => markReadMutation.mutate(activeConversationId)}>
                       Đánh dấu đã đọc
                     </button>
                   </div>
+                  {isConversationClosed ? <small className="muted-text">Ticket đã đóng, bạn không thể gửi thêm tin nhắn.</small> : null}
                 </form>
               </>
             ) : null}
